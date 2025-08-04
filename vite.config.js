@@ -8,6 +8,7 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
+            buildDirectory: 'build',
         }),
         react(),
     ],
@@ -18,5 +19,21 @@ export default defineConfig({
     },
     define: {
         global: 'globalThis',
+    },
+    build: {
+        outDir: 'backend/public/build',
+        emptyOutDir: true,
+        manifest: 'manifest.json',
+        rollupOptions: {
+            input: {
+                app: resolve(__dirname, 'resources/js/app.tsx'),
+                css: resolve(__dirname, 'resources/css/app.css'),
+            },
+        },
+    },
+    server: {
+        hmr: {
+            host: 'localhost',
+        },
     },
 });

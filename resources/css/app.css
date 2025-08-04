@@ -1,18 +1,18 @@
+/* Inter font import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Inter font import */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Base styles following dub-main patterns */
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
   }
-  
+
   body {
-    @apply bg-neutral-50 text-neutral-900;
+    @apply bg-gray-50 text-gray-900;
   }
 }
 
@@ -23,15 +23,15 @@
   }
   
   .btn-primary {
-    @apply bg-neutral-900 text-neutral-50 hover:bg-neutral-900/90;
+    @apply bg-gray-900 text-gray-50 hover:bg-gray-900/90;
   }
-  
+
   .btn-secondary {
-    @apply border border-neutral-200 bg-white hover:bg-neutral-50 hover:text-neutral-900;
+    @apply border border-gray-200 bg-white hover:bg-gray-50 hover:text-gray-900;
   }
-  
+
   .btn-ghost {
-    @apply hover:bg-neutral-100 hover:text-neutral-900;
+    @apply hover:bg-gray-100 hover:text-gray-900;
   }
   
   .card {
@@ -39,7 +39,7 @@
   }
   
   .input {
-    @apply flex h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
 }
 

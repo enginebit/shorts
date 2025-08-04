@@ -7,14 +7,16 @@
 
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button, Input, Label, Checkbox, Select, RadioGroup, RadioGroupItem } from '@/components/ui';
 import { CardList } from '@/components/ui/card-list';
 import { LinkCardExample, generateExampleLinks } from '@/components/examples/link-card-example';
 import { PageProps } from '@/types';
+import { useState } from 'react';
 
 export default function Welcome({ auth }: PageProps) {
   const exampleLinks = generateExampleLinks(5);
+  const [selectedPlan, setSelectedPlan] = useState('starter');
+  const [notifications, setNotifications] = useState(true);
 
   return (
     <AppLayout>
@@ -65,6 +67,58 @@ export default function Welcome({ auth }: PageProps) {
                         <Input placeholder="Regular input" />
                         <Input type="password" placeholder="Password input" />
                         <Input placeholder="Input with error" error="This field is required" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="font-medium mb-2">Form Components</h3>
+                      <div className="space-y-4 max-w-md">
+                        {/* Label + Input */}
+                        <div className="space-y-1">
+                          <Label htmlFor="email">Email Address</Label>
+                          <Input id="email" type="email" placeholder="Enter your email" />
+                        </div>
+
+                        {/* Select */}
+                        <div className="space-y-1">
+                          <Label htmlFor="plan">Choose Plan</Label>
+                          <Select
+                            id="plan"
+                            value={selectedPlan}
+                            onChange={(e) => setSelectedPlan(e.target.value)}
+                            options={[
+                              { value: 'free', label: 'Free Plan' },
+                              { value: 'starter', label: 'Starter Plan' },
+                              { value: 'pro', label: 'Pro Plan' },
+                              { value: 'enterprise', label: 'Enterprise Plan' },
+                            ]}
+                          />
+                        </div>
+
+                        {/* Checkbox */}
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="notifications"
+                            checked={notifications}
+                            onChange={(e) => setNotifications(e.target.checked)}
+                          />
+                          <Label htmlFor="notifications">Enable email notifications</Label>
+                        </div>
+
+                        {/* Radio Group */}
+                        <div className="space-y-2">
+                          <Label>Billing Cycle</Label>
+                          <RadioGroup value="monthly" onValueChange={() => {}}>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="monthly" />
+                              <Label>Monthly</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="yearly" />
+                              <Label>Yearly (20% off)</Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
                       </div>
                     </div>
 
