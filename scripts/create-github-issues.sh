@@ -202,8 +202,142 @@ Integrate Stripe for subscription management, usage tracking, and billing workfl
 
 print_success "Created 1.6 Payment & Billing System epic"
 
-print_info "Phase 1 Epic Issues created successfully!"
-print_info "Run this script to continue creating Phase 2 and Phase 3 epics, then individual task issues."
+# Phase 2 Epic Issues
+print_info "Creating Phase 2 Epic Issues..."
+
+# 2.1 UI Component System
+create_issue "[EPIC] 2.1 UI Component System" \
+"## Epic Overview
+
+Migrate shadcn/ui components and dub-main UI library to Laravel + Inertia.js.
+
+**Augment Task UUID**: \`xejrpPSjRbdAyGtkJiMh5a\`
+**Parent Phase**: #2 Phase 2: Frontend Migration (React + Inertia.js)
+
+## Duration
+2 weeks
+
+## Key Components
+- shadcn/ui component migration and adaptation
+- Dub UI library components (CardList, Charts, Icons)
+- Design system setup with Tailwind config
+- Component documentation and usage examples
+
+## Acceptance Criteria
+- [ ] All shadcn/ui components migrated to Laravel + Inertia.js
+- [ ] Dub-main UI components adapted for our stack
+- [ ] Design system matches dub-main visual patterns
+- [ ] Component library documentation complete
+- [ ] TypeScript definitions for all components
+- [ ] Storybook or similar documentation tool setup
+
+## Dub-Main Reference
+- \`/Users/yasinboelhouwer/shorts/dub-main/packages/ui/src/\`
+- \`/Users/yasinboelhouwer/shorts/dub-main/apps/web/ui/shared/\`
+
+## Subtasks
+- 2.1.1 shadcn/ui Migration
+- 2.1.2 Dub UI Library
+- 2.1.3 Design System Setup
+- 2.1.4 Component Documentation" \
+"epic,phase-2,frontend,priority-high" \
+"Phase 2 - Frontend Migration"
+
+print_success "Created 2.1 UI Component System epic"
+
+# 2.2 Core Application Pages
+create_issue "[EPIC] 2.2 Core Application Pages" \
+"## Epic Overview
+
+Migrate main application pages from app.dub.co including dashboard, links, analytics.
+
+**Augment Task UUID**: \`reet6haqzV2otqHka94M5c\`
+**Parent Phase**: #2 Phase 2: Frontend Migration (React + Inertia.js)
+
+## Duration
+4 weeks
+
+## Key Components
+- Dashboard pages and navigation
+- Links management interface
+- Analytics dashboard with charts
+- Domain management pages
+- QR code generator interface
+
+## Acceptance Criteria
+- [ ] Main dashboard functional with real-time data
+- [ ] Link creation and management working
+- [ ] Analytics pages showing accurate data
+- [ ] Domain configuration interface complete
+- [ ] QR code generation and customization
+- [ ] Responsive design across all devices
+
+## Dependencies
+- Phase 1: Backend Foundation must be complete
+- UI Component System (2.1) must be ready
+
+## Dub-Main Reference
+- \`/Users/yasinboelhouwer/shorts/dub-main/apps/web/app/app.dub.co/\`
+- \`/Users/yasinboelhouwer/shorts/dub-main/apps/web/ui/\`
+
+## Subtasks
+- 2.2.1 Dashboard Pages
+- 2.2.2 Links Management
+- 2.2.3 Analytics Dashboard
+- 2.2.4 Domain Management
+- 2.2.5 QR Code Generator" \
+"epic,phase-2,frontend,priority-critical" \
+"Phase 2 - Frontend Migration"
+
+print_success "Created 2.2 Core Application Pages epic"
+
+print_info "Phase 2 Epic Issues created successfully!"
+
+# Phase 3 Epic Issues
+print_info "Creating Phase 3 Epic Issues..."
+
+# 3.1 End-to-End Testing
+create_issue "[EPIC] 3.1 End-to-End Testing" \
+"## Epic Overview
+
+Comprehensive testing of all user flows, API endpoints, and system integrations.
+
+**Augment Task UUID**: \`2cR95JSs3fkCtL2ezBc2N6\`
+**Parent Phase**: #3 Phase 3: Integration & Testing
+
+## Duration
+1 week
+
+## Key Components
+- End-to-end user flow testing
+- API endpoint comprehensive testing
+- Cross-browser compatibility testing
+- Mobile responsiveness testing
+
+## Acceptance Criteria
+- [ ] All critical user journeys tested
+- [ ] API endpoints tested with various scenarios
+- [ ] Cross-browser compatibility verified
+- [ ] Mobile responsiveness validated
+- [ ] Performance benchmarks established
+- [ ] Automated test suite operational
+
+## Dependencies
+- Phase 1: Backend Foundation complete
+- Phase 2: Frontend Migration complete
+
+## Testing Tools
+- Playwright for E2E testing
+- PHPUnit for backend testing
+- Vitest for frontend unit testing
+- Lighthouse for performance testing" \
+"epic,phase-3,testing,priority-high" \
+"Phase 3 - Integration & Testing"
+
+print_success "Created 3.1 End-to-End Testing epic"
+
+print_info "All Epic Issues created successfully!"
+print_info "Next: Create individual task issues for comprehensive project management."
 
 echo ""
-print_success "Epic issues creation completed! Next: Run script again to create task issues."
+print_success "Epic issues creation completed! Repository ready for task creation."
