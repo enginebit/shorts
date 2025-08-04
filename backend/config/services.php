@@ -52,4 +52,10 @@ return [
         'api_url' => env('TINYBIRD_API_URL', 'https://api.tinybird.co'),
     ],
 
+    'stripe' => [
+        'secret_key' => env('STRIPE_SECRET_KEY'),
+        'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
 ];

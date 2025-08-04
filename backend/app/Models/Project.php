@@ -70,6 +70,12 @@ final class Project extends Model
         'monthly_clicks',
         'current_month',
         'active_links',
+        'stripe_customer_id',
+        'stripe_subscription_id',
+        'plan',
+        'billing_cycle_start',
+        'billing_enabled',
+        'trial_ends_at',
     ];
 
     /**
@@ -132,5 +138,45 @@ final class Project extends Model
         return $this->belongsToMany(User::class, 'project_users')
             ->withPivot(['role', 'created_at', 'updated_at'])
             ->withTimestamps();
+    }
+
+    /**
+     * Get the invoices for the project.
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Check if project is on a paid plan
+     */
+    public function isPaidPlan(): bool
+    {
+        return !in_array($this->plan, ['free', 'trial']);
+    }
+
+    /**
+     * Check if project is on trial
+     */
+    public function isOnTrial(): bool
+    {
+        return $this->trial_ends_at && $this->trial_ends_at->isFuture();
+    }
+
+    /**
+     * Check if trial has expired
+     */
+    public function isTrialExpired(): bool
+    {
+        return $this->trial_ends_at && $this->trial_ends_at->isPast();
+    }
+
+    /**
+     * Check if payment has failed
+     */
+    public function hasPaymentFailed(): bool
+    {
+        return $this->payment_failed_at !== null;
     }
 }
