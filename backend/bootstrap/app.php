@@ -12,7 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Add security headers to all responses
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // Rate limiting for API routes
+        $middleware->throttleApi('60,1'); // 60 requests per minute
+
+        // CORS configuration for API
+        $middleware->api(append: [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
