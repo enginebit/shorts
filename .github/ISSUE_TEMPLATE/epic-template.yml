@@ -1,0 +1,159 @@
+name: 📋 Epic Template
+description: Template for main components (1.1 Database Architecture, 2.1 UI Component System, etc.)
+title: "[EPIC] "
+labels: ["epic", "component"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Epic Overview
+        Use this template for main components within each development phase.
+        
+  - type: input
+    id: epic-id
+    attributes:
+      label: Epic ID
+      description: Epic identifier (e.g., 1.1, 2.1, 3.1)
+      placeholder: "1.1"
+    validations:
+      required: true
+      
+  - type: input
+    id: epic-name
+    attributes:
+      label: Epic Name
+      description: Descriptive name for this epic
+      placeholder: "Database Architecture"
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      description: Which phase does this epic belong to?
+      options:
+        - Phase 1 - Backend Foundation
+        - Phase 2 - Frontend Migration
+        - Phase 3 - Integration & Testing
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: component-type
+    attributes:
+      label: Component Type
+      description: Type of component this epic represents
+      options:
+        - Backend
+        - Frontend
+        - Database
+        - API
+        - Authentication
+        - Analytics
+        - Billing
+        - Testing
+        - Infrastructure
+    validations:
+      required: true
+      
+  - type: textarea
+    id: epic-description
+    attributes:
+      label: Epic Description
+      description: Detailed description of what this epic encompasses
+      placeholder: "Migrate Prisma schemas to Laravel migrations, establish relationships, and set up database infrastructure"
+    validations:
+      required: true
+      
+  - type: input
+    id: estimated-time
+    attributes:
+      label: Estimated Time
+      description: Expected time to complete this epic
+      placeholder: "2 weeks"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: subtasks
+    attributes:
+      label: Subtasks
+      description: List of subtasks that make up this epic
+      placeholder: |
+        - [ ] 1.1.1 Core Schema Migration
+        - [ ] 1.1.2 Analytics Schema
+        - [ ] 1.1.3 Partner Program Schema
+        - [ ] 1.1.4 Billing & Subscription Schema
+        - [ ] 1.1.5 Eloquent Models
+      render: markdown
+    validations:
+      required: true
+      
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Specific criteria that must be met for this epic to be considered complete
+      placeholder: |
+        - [ ] All database tables are created with proper relationships
+        - [ ] Eloquent models are implemented with appropriate casts and relationships
+        - [ ] Database indexes are optimized for performance
+        - [ ] Migration rollback functionality is tested
+      render: markdown
+    validations:
+      required: true
+      
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What needs to be completed before this epic can start?
+      placeholder: "List any dependencies on other epics or external factors"
+      
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Priority level for this epic
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+      
+  - type: textarea
+    id: dub-reference
+    attributes:
+      label: Dub-Main Reference
+      description: Specific dub-main components this epic is based on
+      placeholder: |
+        **Reference Files:**
+        - `/Users/yasinboelhouwer/shorts/dub-main/packages/prisma/schema/`
+        - `/Users/yasinboelhouwer/shorts/dub-main/apps/web/lib/`
+        
+        **Key Patterns:**
+        - Database schema structure
+        - Relationship definitions
+        - Data validation patterns
+        
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Technical considerations, architecture decisions, or implementation notes
+      placeholder: "Technical details, architecture decisions, or implementation considerations"
+      
+  - type: textarea
+    id: testing-requirements
+    attributes:
+      label: Testing Requirements
+      description: Specific testing requirements for this epic
+      placeholder: |
+        - Unit tests for all models
+        - Integration tests for database relationships
+        - Performance tests for query optimization
+        - Migration rollback testing

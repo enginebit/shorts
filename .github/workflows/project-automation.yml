@@ -1,0 +1,127 @@
+name: Project Automation
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Auto-label issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+            const body = issue.body || '';
+            
+            const labels = [];
+            
+            // Phase labels
+            if (title.includes('[phase]') || body.includes('phase 1')) {
+              labels.push('phase-1');
+            } else if (body.includes('phase 2')) {
+              labels.push('phase-2');
+            } else if (body.includes('phase 3')) {
+              labels.push('phase-3');
+            }
+            
+            // Component type labels
+            if (title.includes('[epic]')) {
+              labels.push('epic');
+            } else if (title.includes('[task]')) {
+              labels.push('task');
+            }
+            
+            // Area labels
+            if (body.includes('backend') || body.includes('laravel') || body.includes('api')) {
+              labels.push('backend');
+            }
+            if (body.includes('frontend') || body.includes('react') || body.includes('inertia')) {
+              labels.push('frontend');
+            }
+            if (body.includes('database') || body.includes('migration') || body.includes('eloquent')) {
+              labels.push('database');
+            }
+            if (body.includes('authentication') || body.includes('auth') || body.includes('sanctum')) {
+              labels.push('authentication');
+            }
+            if (body.includes('analytics') || body.includes('tinybird') || body.includes('tracking')) {
+              labels.push('analytics');
+            }
+            if (body.includes('billing') || body.includes('stripe') || body.includes('subscription')) {
+              labels.push('billing');
+            }
+            if (body.includes('testing') || body.includes('test')) {
+              labels.push('testing');
+            }
+            
+            // Priority labels
+            if (body.includes('priority: critical') || body.includes('critical')) {
+              labels.push('priority-critical');
+            } else if (body.includes('priority: high') || body.includes('high')) {
+              labels.push('priority-high');
+            } else if (body.includes('priority: medium') || body.includes('medium')) {
+              labels.push('priority-medium');
+            } else if (body.includes('priority: low') || body.includes('low')) {
+              labels.push('priority-low');
+            }
+            
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labels
+              });
+            }
+
+  update-project:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' || github.event.action == 'closed'
+    steps:
+      - name: Add to project
+        uses: actions/add-to-project@v0.5.0
+        with:
+          project-url: https://github.com/users/makafeli/projects/1
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  link-issues:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Link related issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+            
+            // Extract parent epic or task references
+            const parentMatch = body.match(/Parent Epic:\s*(.+)/i);
+            const augmentUuidMatch = body.match(/Augment Task UUID:\s*(.+)/i);
+            
+            if (parentMatch || augmentUuidMatch) {
+              let comment = '## Related Issues\n\n';
+              
+              if (parentMatch) {
+                comment += `**Parent Epic:** ${parentMatch[1]}\n`;
+              }
+              
+              if (augmentUuidMatch) {
+                comment += `**Augment Task UUID:** \`${augmentUuidMatch[1]}\`\n`;
+              }
+              
+              comment += '\n---\n*This issue is part of the [Dub.co to Laravel Migration Project](https://github.com/makafeli/dub-laravel-migration)*';
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment
+              });
+            }

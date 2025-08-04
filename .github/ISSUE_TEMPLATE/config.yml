@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Project Documentation
+    url: https://github.com/makafeli/dub-laravel-migration/blob/main/docs/PRD-Dub-Migration.md
+    about: View the comprehensive Product Requirements Document
+  - name: 🏗️ Architecture Reference
+    url: https://github.com/makafeli/dub-laravel-migration/blob/main/docs/architecture/
+    about: Review architecture documentation and design decisions
+  - name: 🔗 Dub.co Reference
+    url: https://github.com/dubinc/dub
+    about: Original Dub.co repository for reference and patterns
+  - name: 💬 Team Discussion
+    url: https://github.com/makafeli/dub-laravel-migration/discussions
+    about: General questions and team discussions

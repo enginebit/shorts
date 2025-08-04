@@ -1,0 +1,120 @@
+name: 🚀 Phase Template
+description: Template for major development phases (Phase 1, 2, 3)
+title: "[PHASE] "
+labels: ["phase", "epic"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Phase Overview
+        Use this template for major development phases in the Dub.co to Laravel migration project.
+        
+  - type: input
+    id: phase-number
+    attributes:
+      label: Phase Number
+      description: Which phase is this? (Phase 1, Phase 2, Phase 3)
+      placeholder: "Phase 1"
+    validations:
+      required: true
+      
+  - type: input
+    id: phase-name
+    attributes:
+      label: Phase Name
+      description: Descriptive name for this phase
+      placeholder: "Backend Foundation (Laravel)"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: phase-description
+    attributes:
+      label: Phase Description
+      description: Detailed description of what this phase encompasses
+      placeholder: "Implement complete Laravel backend infrastructure including database, APIs, authentication, and core services"
+    validations:
+      required: true
+      
+  - type: input
+    id: duration
+    attributes:
+      label: Estimated Duration
+      description: Expected time to complete this phase
+      placeholder: "8-10 weeks"
+    validations:
+      required: true
+      
+  - type: textarea
+    id: key-deliverables
+    attributes:
+      label: Key Deliverables
+      description: List the main deliverables for this phase
+      placeholder: |
+        - Database architecture and migrations
+        - Authentication system implementation
+        - Core API endpoints
+        - Background job system
+      render: markdown
+    validations:
+      required: true
+      
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How will we know this phase is complete?
+      placeholder: |
+        - [ ] All database migrations are complete and tested
+        - [ ] Authentication system is fully functional
+        - [ ] All API endpoints are implemented and documented
+        - [ ] Background job system is operational
+      render: markdown
+    validations:
+      required: true
+      
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What needs to be completed before this phase can start?
+      placeholder: "List any dependencies or prerequisites"
+      
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Priority level for this phase
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+      
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks & Mitigation
+      description: Potential risks and how to mitigate them
+      placeholder: |
+        **Risk**: Data migration complexity
+        **Mitigation**: Comprehensive testing environment with production data copies
+        
+  - type: textarea
+    id: dub-reference
+    attributes:
+      label: Dub-Main Reference
+      description: Links to relevant dub-main repository components
+      placeholder: |
+        - `/Users/yasinboelhouwer/shorts/dub-main/apps/web/app/api/`
+        - `/Users/yasinboelhouwer/shorts/dub-main/packages/prisma/`
+        
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Any additional information or context
+      placeholder: "Additional context, notes, or considerations"
