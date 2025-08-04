@@ -74,14 +74,19 @@ validate_directory() {
 validate_yaml() {
     local file=$1
     local description=$2
-    
+
     if command -v python3 &> /dev/null; then
-        if python3 -c "import yaml; yaml.safe_load(open('$file'))" 2>/dev/null; then
-            print_success "$description has valid YAML syntax"
-            ((PASSED++))
+        if python3 -c "import yaml" 2>/dev/null; then
+            if python3 -c "import yaml; yaml.safe_load(open('$file'))" 2>/dev/null; then
+                print_success "$description has valid YAML syntax"
+                ((PASSED++))
+            else
+                print_error "$description has invalid YAML syntax"
+                ((FAILED++))
+            fi
         else
-            print_error "$description has invalid YAML syntax"
-            ((FAILED++))
+            print_warning "PyYAML not available, skipping YAML validation for $description"
+            ((WARNINGS++))
         fi
     else
         print_warning "Python3 not available, skipping YAML validation for $description"
