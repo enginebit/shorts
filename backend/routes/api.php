@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\DomainsController;
+use App\Http\Controllers\Api\LinksController;
+use App\Http\Controllers\Api\ProjectsController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -47,4 +51,24 @@ Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     // User profile route (legacy compatibility)
     Route::get('/user', [AuthController::class, 'me']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Core API Routes
+    |--------------------------------------------------------------------------
+    */
+
+    // Links API - following dub-main patterns
+    Route::apiResource('links', LinksController::class);
+
+    // Analytics API
+    Route::get('links/{linkId}/analytics', [AnalyticsController::class, 'linkAnalytics']);
+    Route::get('analytics/overview', [AnalyticsController::class, 'overview']);
+
+    // Domains API
+    Route::apiResource('domains', DomainsController::class);
+    Route::put('domains/{id}/verify', [DomainsController::class, 'verify']);
+
+    // Projects/Workspaces API
+    Route::apiResource('projects', ProjectsController::class);
 });

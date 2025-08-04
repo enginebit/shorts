@@ -129,7 +129,8 @@ final class OAuthController extends Controller
             $filename = "avatars/{$userId}/" . Str::random(40) . '.jpg';
             Storage::disk('public')->put($filename, $contents);
 
-            return Storage::disk('public')->url($filename);
+            // Generate proper URL for both local and production environments
+            return config('app.url') . '/storage/' . $filename;
         } catch (\Exception $e) {
             // Log error but don't fail authentication
             logger()->error('Failed to store OAuth avatar', [

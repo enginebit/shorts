@@ -77,6 +77,9 @@ return new class extends Migration
 
             $table->timestamps();
 
+            // Soft deletes
+            $table->softDeletes();
+
             // Indexes following dub-main patterns
             $table->unique(['domain', 'key']); // for getting a link by domain and key
             $table->unique(['project_id', 'external_id']); // for getting a link by externalId

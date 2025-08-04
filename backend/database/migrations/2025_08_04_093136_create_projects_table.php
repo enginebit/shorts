@@ -69,6 +69,9 @@ return new class extends Migration
             $table->timestamps();
             $table->timestamp('usage_last_checked')->default(now());
 
+            // Soft deletes
+            $table->softDeletes();
+
             // Indexes following dub-main patterns
             $table->index('usage_last_checked');
         });
