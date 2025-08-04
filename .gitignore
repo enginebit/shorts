@@ -23,6 +23,7 @@ lerna-debug.log*
 # PHP/Composer
 vendor/
 composer.phar
+composer.lock
 
 # -----------------------------------------------------------------------------
 # Environment & Configuration Files

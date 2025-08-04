@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add security headers to all responses
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
+        // Inertia.js middleware for web routes
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+        ]);
+
         // Rate limiting for API routes
         $middleware->throttleApi('60,1'); // 60 requests per minute
 
