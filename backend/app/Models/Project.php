@@ -67,6 +67,9 @@ final class Project extends Model
         'sso_enabled',
         'dot_link_claimed',
         'usage_last_checked',
+        'monthly_clicks',
+        'current_month',
+        'active_links',
     ];
 
     /**

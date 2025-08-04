@@ -63,6 +63,7 @@ final class Link extends Model
         'tenant_id',
         'public_stats',
         'clicks',
+        'unique_clicks',
         'last_clicked',
         'leads',
         'sales',
