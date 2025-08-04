@@ -47,4 +47,9 @@ return [
         'redirect' => env('APP_URL') . '/api/auth/oauth/github/callback',
     ],
 
+    'tinybird' => [
+        'api_key' => env('TINYBIRD_API_KEY'),
+        'api_url' => env('TINYBIRD_API_URL', 'https://api.tinybird.co'),
+    ],
+
 ];
