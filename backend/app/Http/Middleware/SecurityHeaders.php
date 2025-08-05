@@ -29,14 +29,14 @@ final class SecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
 
-        // Content Security Policy
+        // Content Security Policy - Allow external fonts and Vite dev server
         $csp = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-            "style-src 'self' 'unsafe-inline'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://127.0.0.1:5173 http://localhost:5173 http://127.0.0.1:5174 http://localhost:5174",
+            "style-src 'self' 'unsafe-inline' https://fonts.bunny.net http://127.0.0.1:5173 http://localhost:5173 http://127.0.0.1:5174 http://localhost:5174",
             "img-src 'self' data: https:",
-            "font-src 'self' data:",
-            "connect-src 'self'",
+            "font-src 'self' data: https://fonts.bunny.net",
+            "connect-src 'self' http://127.0.0.1:5173 http://localhost:5173 http://127.0.0.1:5174 http://localhost:5174 ws://127.0.0.1:5173 ws://localhost:5173 ws://127.0.0.1:5174 ws://localhost:5174",
             "frame-ancestors 'none'",
         ];
 

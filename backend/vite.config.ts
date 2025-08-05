@@ -18,4 +18,9 @@ export default defineConfig({
             '@': path.resolve(__dirname, './resources/js'),
         },
     },
+    server: {
+        hmr: {
+            host: 'localhost',
+        },
+    },
 });
