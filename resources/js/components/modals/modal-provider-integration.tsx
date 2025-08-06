@@ -19,6 +19,7 @@ export function ModalProviderIntegration() {
       
       {/* Link Management Modals */}
       <LinkBuilderModal />
+      <EnhancedLinkBuilderModal />
       
       {/* Generic Modals */}
       <ConfirmModal />

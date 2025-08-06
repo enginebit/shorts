@@ -12,6 +12,7 @@ export { Modal, Dialog } from '../ui/modal';
 export { AddWorkspaceModal } from './add-workspace-modal';
 export { ConfirmModal } from './confirm-modal';
 export { LinkBuilderModal } from './link-builder-modal';
+export { EnhancedLinkBuilderModal } from './link-builder-modal-enhanced';
 
 // Modal integration
 export { ModalProviderIntegration } from './modal-provider-integration';
