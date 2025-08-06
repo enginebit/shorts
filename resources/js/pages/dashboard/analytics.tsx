@@ -1,5 +1,5 @@
 /**
- * Workspace Analytics Page
+ * Workspace Analytics Page - Full Implementation
  *
  * Dub.co Reference: /apps/web/app/app.dub.co/(dashboard)/[slug]/analytics/client.tsx
  *
@@ -11,13 +11,14 @@
  *
  * Adaptations for Laravel + Inertia.js:
  * - Uses Inertia page props for analytics data
- * - Placeholder implementation for Phase 3A
- * - Will be fully implemented in Phase 3B
+ * - Full implementation for Phase 3B
+ * - Integrated with AnalyticsController API
  * - Maintains exact visual consistency with dub-main
  */
 
-import { Head } from '@inertiajs/react';
-import { BarChart3, TrendingUp, Globe, Users, Calendar, ArrowUpRight } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { BarChart3, TrendingUp, Globe, Users, MousePointer, ExternalLink, RefreshCw } from 'lucide-react';
 import { AppLayout } from '@/layouts/app-layout';
 import { 
   PageWidthWrapper, 
@@ -25,6 +26,47 @@ import {
   PageHeader 
 } from '@/components/ui';
 import { useWorkspace } from '@/contexts/workspace-context';
+import { AnalyticsCard, ANALYTICS_TABS } from '@/components/analytics/analytics-card';
+import { 
+  MetricsCard, 
+  ClicksMetricsCard, 
+  VisitorsMetricsCard, 
+  ConversionRateCard 
+} from '@/components/analytics/metrics-card';
+import { 
+  BarList, 
+  createCountryBarList, 
+  createReferrerBarList, 
+  createDeviceBarList 
+} from '@/components/analytics/bar-list';
+import { TimePeriodSelector, useTimePeriod } from '@/components/analytics/time-period-selector';
+import { toast } from 'sonner';
+
+interface AnalyticsData {
+  clicks: {
+    total: number;
+    change: number;
+    timeseries: Array<{ date: string; clicks: number }>;
+  };
+  visitors: {
+    total: number;
+    change: number;
+  };
+  conversionRate: {
+    rate: number;
+    change: number;
+  };
+  topCountries: Array<{ country: string; clicks: number }>;
+  topReferrers: Array<{ referrer: string; clicks: number }>;
+  topDevices: Array<{ device: string; clicks: number }>;
+  topLinks: Array<{ 
+    id: string; 
+    url: string; 
+    shortLink: string; 
+    clicks: number; 
+    title?: string; 
+  }>;
+}
 
 interface AnalyticsPageProps {
   workspace: {
@@ -32,77 +74,63 @@ interface AnalyticsPageProps {
     name: string;
     slug: string;
   };
+  initialData?: AnalyticsData;
+  interval?: string;
 }
 
-function ComingSoonCard({ 
-  title, 
-  description, 
-  icon: Icon 
-}: {
-  title: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100">
-            <Icon className="h-5 w-5 text-neutral-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-neutral-900">{title}</h3>
-            <p className="text-sm text-neutral-600">{description}</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-            Coming Soon
-          </span>
-        </div>
-      </div>
-      
-      <div className="h-32 rounded-lg bg-neutral-50 flex items-center justify-center">
-        <div className="text-center">
-          <Icon className="mx-auto h-8 w-8 text-neutral-400 mb-2" />
-          <p className="text-sm text-neutral-500">Analytics visualization</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default function AnalyticsPage({ 
+  workspace, 
+  initialData,
+  interval = '7d' 
+}: AnalyticsPageProps) {
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
+  const [error, setError] = useState<string | null>(null);
+  const { period, setPeriod } = useTimePeriod(interval);
+  const [selectedTab, setSelectedTab] = useState<string>('clicks');
 
-function PlaceholderMetric({ 
-  label, 
-  value, 
-  change, 
-  icon: Icon 
-}: {
-  label: string;
-  value: string;
-  change: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-neutral-600">{label}</p>
-          <p className="text-2xl font-bold text-neutral-900">{value}</p>
-          <div className="flex items-center gap-1 mt-1">
-            <ArrowUpRight className="h-3 w-3 text-green-600" />
-            <span className="text-sm text-green-600">{change}</span>
-          </div>
-        </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-50">
-          <Icon className="h-6 w-6 text-neutral-600" />
-        </div>
-      </div>
-    </div>
-  );
-}
+  // Fetch analytics data
+  const fetchAnalytics = async (selectedPeriod: string = period) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-export default function AnalyticsPage({ workspace }: AnalyticsPageProps) {
+      const response = await fetch(
+        route('api.analytics.overview', {
+          workspaceId: workspace.id,
+          interval: selectedPeriod,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        })
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch analytics data');
+      }
+
+      const data = await response.json();
+      setAnalyticsData(data);
+    } catch (err) {
+      console.error('Analytics fetch error:', err);
+      setError('Failed to load analytics data');
+      toast.error('Failed to load analytics data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch data when period changes
+  useEffect(() => {
+    fetchAnalytics(period);
+  }, [period, workspace.id]);
+
+  const handlePeriodChange = (newPeriod: string) => {
+    setPeriod(newPeriod);
+  };
+
+  const handleRefresh = () => {
+    fetchAnalytics();
+  };
+
   return (
     <AppLayout>
       <Head title={`Analytics - ${workspace.name}`} />
@@ -110,117 +138,158 @@ export default function AnalyticsPage({ workspace }: AnalyticsPageProps) {
       <PageHeader
         title="Analytics"
         description="Track your link performance and audience insights"
+        action={
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <TimePeriodSelector
+              selectedPeriod={period}
+              onPeriodChange={handlePeriodChange}
+            />
+          </div>
+        }
       />
 
       <PageWidthWrapper className="py-8">
         <div className="space-y-8">
-          {/* Phase 3B Notice */}
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-blue-900">Analytics Dashboard Coming Soon</h3>
-                <p className="text-sm text-blue-700 mt-1">
-                  Comprehensive analytics with real-time click tracking, geographic insights, and performance metrics 
-                  will be implemented in Phase 3B: Core Features.
-                </p>
-                <div className="mt-4">
-                  <Button variant="secondary" size="sm">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    View Roadmap
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Placeholder Metrics */}
+          {/* Key Metrics */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <PlaceholderMetric
-              label="Total Clicks"
-              value="12,345"
-              change="+12.5% from last month"
-              icon={BarChart3}
+            <ClicksMetricsCard
+              clicks={analyticsData?.clicks.total || 0}
+              change={analyticsData?.clicks.change}
+              loading={loading}
+              error={error}
             />
-            <PlaceholderMetric
-              label="Unique Visitors"
-              value="8,901"
-              change="+8.2% from last month"
-              icon={Users}
+            <VisitorsMetricsCard
+              visitors={analyticsData?.visitors.total || 0}
+              change={analyticsData?.visitors.change}
+              loading={loading}
+              error={error}
             />
-            <PlaceholderMetric
-              label="Top Countries"
-              value="23"
-              change="+3 new countries"
-              icon={Globe}
+            <ConversionRateCard
+              rate={analyticsData?.conversionRate.rate || 0}
+              change={analyticsData?.conversionRate.change}
+              loading={loading}
+              error={error}
             />
-            <PlaceholderMetric
-              label="Conversion Rate"
-              value="3.4%"
-              change="+0.8% from last month"
-              icon={TrendingUp}
-            />
+            <MetricsCard
+              title="Top Performing Link"
+              value={analyticsData?.topLinks?.[0]?.clicks || 0}
+              icon={MousePointer}
+              loading={loading}
+              error={error}
+            >
+              {analyticsData?.topLinks?.[0] && (
+                <p className="text-xs text-neutral-500 truncate mt-1">
+                  {analyticsData.topLinks[0].title || analyticsData.topLinks[0].shortLink}
+                </p>
+              )}
+            </MetricsCard>
           </div>
 
-          {/* Coming Soon Cards */}
+          {/* Analytics Cards Grid */}
           <div className="grid gap-6 lg:grid-cols-2">
-            <ComingSoonCard
-              title="Click Analytics"
-              description="Real-time click tracking and performance metrics"
-              icon={BarChart3}
-            />
-            <ComingSoonCard
-              title="Geographic Insights"
-              description="See where your audience is located worldwide"
-              icon={Globe}
-            />
-            <ComingSoonCard
-              title="Referrer Analysis"
-              description="Track which sources drive the most traffic"
-              icon={TrendingUp}
-            />
-            <ComingSoonCard
-              title="Device & Browser Stats"
-              description="Understand your audience's technology preferences"
-              icon={Users}
-            />
-          </div>
+            {/* Countries */}
+            <AnalyticsCard
+              tabs={ANALYTICS_TABS.LOCATIONS}
+              selectedTabId="countries"
+              title="Top Countries"
+              expandLimit={5}
+              hasMore={(analyticsData?.topCountries?.length || 0) > 5}
+            >
+              {({ limit }) => (
+                <BarList
+                  data={createCountryBarList(analyticsData?.topCountries || [])}
+                  loading={loading}
+                  emptyMessage="No geographic data available"
+                  maxItems={limit}
+                />
+              )}
+            </AnalyticsCard>
 
-          {/* Feature Preview */}
-          <div className="rounded-lg border border-neutral-200 bg-white p-8">
-            <div className="text-center">
-              <div className="mx-auto h-16 w-16 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
-                <BarChart3 className="h-8 w-8 text-neutral-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-neutral-900 mb-2">
-                Advanced Analytics Coming Soon
-              </h3>
-              <p className="text-neutral-600 max-w-2xl mx-auto mb-6">
-                Get detailed insights into your link performance with real-time analytics, 
-                geographic data, referrer tracking, and conversion metrics. Our analytics 
-                dashboard will help you understand your audience and optimize your campaigns.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-neutral-500">
-                <span className="flex items-center gap-1">
-                  <BarChart3 className="h-4 w-4" />
-                  Real-time tracking
-                </span>
-                <span className="flex items-center gap-1">
-                  <Globe className="h-4 w-4" />
-                  Geographic insights
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  Audience analytics
-                </span>
-                <span className="flex items-center gap-1">
-                  <TrendingUp className="h-4 w-4" />
-                  Performance metrics
-                </span>
-              </div>
-            </div>
+            {/* Referrers */}
+            <AnalyticsCard
+              tabs={[{ id: 'referrers', label: 'Referrers', icon: ExternalLink }]}
+              selectedTabId="referrers"
+              title="Top Referrers"
+              expandLimit={5}
+              hasMore={(analyticsData?.topReferrers?.length || 0) > 5}
+            >
+              {({ limit }) => (
+                <BarList
+                  data={createReferrerBarList(analyticsData?.topReferrers || [])}
+                  loading={loading}
+                  emptyMessage="No referrer data available"
+                  maxItems={limit}
+                />
+              )}
+            </AnalyticsCard>
+
+            {/* Devices */}
+            <AnalyticsCard
+              tabs={ANALYTICS_TABS.DEVICES}
+              selectedTabId="devices"
+              title="Devices"
+              expandLimit={5}
+              hasMore={(analyticsData?.topDevices?.length || 0) > 5}
+            >
+              {({ limit }) => (
+                <BarList
+                  data={createDeviceBarList(analyticsData?.topDevices || [])}
+                  loading={loading}
+                  emptyMessage="No device data available"
+                  maxItems={limit}
+                />
+              )}
+            </AnalyticsCard>
+
+            {/* Top Links */}
+            <AnalyticsCard
+              tabs={[{ id: 'links', label: 'Top Links', icon: MousePointer }]}
+              selectedTabId="links"
+              title="Top Performing Links"
+              expandLimit={5}
+              hasMore={(analyticsData?.topLinks?.length || 0) > 5}
+            >
+              {({ limit }) => (
+                <div className="p-4 space-y-3">
+                  {loading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-4 bg-neutral-200 rounded mb-2" />
+                        <div className="h-3 bg-neutral-200 rounded w-3/4" />
+                      </div>
+                    ))
+                  ) : analyticsData?.topLinks?.slice(0, limit).map((link) => (
+                    <div key={link.id} className="flex items-center justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-neutral-900 truncate">
+                          {link.title || link.shortLink}
+                        </p>
+                        <p className="text-xs text-neutral-500 truncate">
+                          {link.url}
+                        </p>
+                      </div>
+                      <div className="text-sm font-medium text-neutral-900 ml-4">
+                        {link.clicks.toLocaleString()}
+                      </div>
+                    </div>
+                  )) || (
+                    <div className="text-center py-8">
+                      <MousePointer className="mx-auto h-8 w-8 text-neutral-400 mb-2" />
+                      <p className="text-sm text-neutral-500">No link data available</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </AnalyticsCard>
           </div>
         </div>
       </PageWidthWrapper>
