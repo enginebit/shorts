@@ -13,6 +13,9 @@ export { AddWorkspaceModal } from './add-workspace-modal';
 export { ConfirmModal } from './confirm-modal';
 export { LinkBuilderModal } from './link-builder-modal';
 
+// Modal integration
+export { ModalProviderIntegration } from './modal-provider-integration';
+
 // Modal context and hooks
 export {
   ModalProvider,

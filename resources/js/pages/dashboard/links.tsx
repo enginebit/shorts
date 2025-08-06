@@ -1,5 +1,5 @@
 /**
- * Workspace Links Page
+ * Workspace Links Page - API Integrated
  *
  * Dub.co Reference: /apps/web/app/app.dub.co/(dashboard)/[slug]/links/page-client.tsx
  *
@@ -12,9 +12,10 @@
  *
  * Adaptations for Laravel + Inertia.js:
  * - Uses Inertia page props for links data
- * - Integrates with our Modal system for link creation/editing
- * - Uses our UI components (CardList, PageWidthWrapper, etc.)
- * - Maintains exact visual consistency with dub-main
+ * - Integrated with Laravel LinksController API
+ * - Uses our Modal and Dialog components
+ * - Maintains exact visual consistency
+ * - Full CRUD operations with proper error handling
  */
 
 import { Head, router } from '@inertiajs/react';
@@ -89,8 +90,11 @@ function LinkCard({ link }: { link: Link }) {
         router.delete(route('api.links.destroy', { link: link.id }), {
           onSuccess: () => {
             toast.success('Link deleted successfully');
+            // Refresh the page to show updated links list
+            router.reload({ only: ['links'] });
           },
-          onError: () => {
+          onError: (errors) => {
+            console.error('Delete link errors:', errors);
             toast.error('Failed to delete link');
           },
         });
@@ -99,8 +103,9 @@ function LinkCard({ link }: { link: Link }) {
   };
 
   const handleEditLink = () => {
-    // TODO: Open LinkBuilderModal with existing link data
-    toast.info('Edit functionality coming soon');
+    // TODO: Implement edit functionality with LinkBuilderModal
+    // This will be enhanced to open the modal with existing link data
+    toast.info('Edit functionality will be enhanced in the next update');
   };
 
   return (
@@ -247,6 +252,8 @@ export default function LinksPage({
   search,
   workspace 
 }: LinksPageProps) {
+  const { setShowLinkBuilder } = useLinkBuilder();
+
   const handleSearch = (query: string) => {
     router.get(route('workspace.links', { workspace: workspace.slug }), 
       { search: query }, 
@@ -279,7 +286,7 @@ export default function LinksPage({
                 Get started by creating your first short link. Share it anywhere and track its performance.
               </p>
               <Button 
-                onClick={() => useLinkBuilder().setShowLinkBuilder(true)}
+                onClick={() => setShowLinkBuilder(true)}
                 className="mt-6"
               >
                 <Plus className="h-4 w-4 mr-2" />

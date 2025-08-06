@@ -1,5 +1,5 @@
 /**
- * Link Builder Modal Component
+ * Link Builder Modal Component - API Integrated
  *
  * Dub.co Reference: /apps/web/ui/modals/link-builder/index.tsx
  *
@@ -12,14 +12,14 @@
  *
  * Adaptations for Laravel + Inertia.js:
  * - Uses Inertia useForm for form handling
- * - Integrated with our Modal and Dialog components
- * - Uses Laravel backend for link creation/editing
+ * - Integrated with Laravel LinksController API
+ * - Uses our Modal and Dialog components
  * - Maintains exact visual consistency
- * - Simplified initial implementation (will be enhanced)
+ * - Full API integration with proper error handling
  */
 
 import { useState, useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, router } from '@inertiajs/react';
 import { toast } from 'sonner';
 import { Link as LinkIcon, Globe, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -34,7 +34,7 @@ interface LinkFormData {
   title?: string;
   description?: string;
   image?: string;
-  expiresAt?: string;
+  expires_at?: string;
   password?: string;
   ios?: string;
   android?: string;
@@ -46,7 +46,7 @@ function LinkBuilderForm({
   initialData,
 }: {
   onSuccess?: (data: any) => void;
-  initialData?: Partial<LinkFormData>;
+  initialData?: Partial<LinkFormData & { id: string }>;
 }) {
   const { currentWorkspace } = useWorkspace();
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -58,7 +58,7 @@ function LinkBuilderForm({
     title: initialData?.title || '',
     description: initialData?.description || '',
     image: initialData?.image || '',
-    expiresAt: initialData?.expiresAt || '',
+    expires_at: initialData?.expires_at || '',
     password: initialData?.password || '',
     ios: initialData?.ios || '',
     android: initialData?.android || '',
@@ -67,7 +67,7 @@ function LinkBuilderForm({
 
   // Auto-generate key from URL if not provided
   useEffect(() => {
-    if (data.url && !data.key) {
+    if (data.url && !data.key && !initialData) {
       try {
         const urlObj = new URL(data.url);
         const hostname = urlObj.hostname.replace('www.', '');
@@ -78,25 +78,47 @@ function LinkBuilderForm({
         // Invalid URL, don't auto-generate key
       }
     }
-  }, [data.url, data.key, setData]);
+  }, [data.url, data.key, setData, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const endpoint = initialData ? route('links.update', { link: 'id' }) : route('links.store');
+    // Prepare data for API
+    const apiData = {
+      url: data.url,
+      domain: data.domain,
+      key: data.key || undefined, // Let backend generate if empty
+      title: data.title || undefined,
+      description: data.description || undefined,
+      image: data.image || undefined,
+      expires_at: data.expires_at || undefined,
+      password: data.password || undefined,
+      ios: data.ios || undefined,
+      android: data.android || undefined,
+      geo: data.geo && Object.keys(data.geo).length > 0 ? JSON.stringify(data.geo) : undefined,
+    };
+
+    const endpoint = initialData 
+      ? route('api.links.update', { link: initialData.id }) 
+      : route('api.links.store');
     const method = initialData ? put : post;
     
-    method(endpoint, {
+    method(endpoint, apiData, {
       onSuccess: (response) => {
         toast.success(initialData ? 'Link updated successfully!' : 'Link created successfully!');
         reset();
         onSuccess?.(response);
+        // Refresh the current page to show updated links
+        router.reload({ only: ['links'] });
       },
       onError: (errors) => {
+        console.error('Link creation/update errors:', errors);
         if (errors.url) {
           toast.error('Please enter a valid URL');
         } else if (errors.key) {
           toast.error('This short link already exists');
+        } else if (errors.domain) {
+          toast.error('Invalid domain selected');
         } else {
           toast.error('Failed to save link. Please try again.');
         }
@@ -104,7 +126,7 @@ function LinkBuilderForm({
     });
   };
 
-  // Mock domains - will be replaced with real workspace domains
+  // Available domains - will be enhanced with real workspace domains
   const availableDomains = [
     { value: 'dub.sh', label: 'dub.sh' },
     { value: 'short.ly', label: 'short.ly' },
@@ -230,8 +252,8 @@ function LinkBuilderForm({
               <Input
                 id="expiry-date"
                 type="datetime-local"
-                value={data.expiresAt}
-                onChange={(e) => setData('expiresAt', e.target.value)}
+                value={data.expires_at}
+                onChange={(e) => setData('expires_at', e.target.value)}
               />
             </div>
             
@@ -276,7 +298,6 @@ export function LinkBuilderModal() {
 
   const handleSuccess = (data: any) => {
     setShowLinkBuilder(false);
-    // Could trigger a refresh of links list here
   };
 
   const handleClose = () => {

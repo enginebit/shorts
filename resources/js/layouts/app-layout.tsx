@@ -1,12 +1,14 @@
 /**
  * AppLayout Component
- * 
- * Basic application layout following dub-main patterns
- * Will be enhanced with full navigation and sidebar components later
+ *
+ * Enhanced application layout with navigation system from dub-main migration
+ * Features sidebar navigation, workspace switching, user management, and modal system
  */
 
 import { ReactNode } from 'react';
-import { PageWidthWrapper } from '@/components/layout/page-width-wrapper';
+import { MainNav, Sidebar } from '@/components/ui';
+import { ModalProvider } from '@/contexts/modal-context';
+import { ModalProviderIntegration } from '@/components/modals/modal-provider-integration';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -15,12 +17,15 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, className }: AppLayoutProps) {
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <main className={className}>
-        <PageWidthWrapper>
+    <ModalProvider>
+      <MainNav sidebar={Sidebar}>
+        <div className={className}>
           {children}
-        </PageWidthWrapper>
-      </main>
-    </div>
+        </div>
+      </MainNav>
+      
+      {/* Modal Components - Rendered at app level */}
+      <ModalProviderIntegration />
+    </ModalProvider>
   );
 }
