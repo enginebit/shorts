@@ -118,6 +118,40 @@ export function getDomainFromUrl(url: string): string {
 }
 
 /**
+ * Get URL from string - validates and returns URL if valid
+ * Migrated from dub-main utils
+ */
+export function getUrlFromString(str: string): string | null {
+  if (!str) return null;
+  
+  // If it already looks like a URL, validate it
+  if (str.startsWith('http://') || str.startsWith('https://')) {
+    try {
+      new URL(str);
+      return str;
+    } catch {
+      return null;
+    }
+  }
+  
+  // Try adding https:// prefix
+  try {
+    const urlWithHttps = `https://${str}`;
+    new URL(urlWithHttps);
+    return urlWithHttps;
+  } catch {
+    // Try adding http:// prefix
+    try {
+      const urlWithHttp = `http://${str}`;
+      new URL(urlWithHttp);
+      return urlWithHttp;
+    } catch {
+      return null;
+    }
+  }
+}
+
+/**
  * Copy text to clipboard
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
