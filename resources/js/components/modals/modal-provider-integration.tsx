@@ -10,6 +10,7 @@
 import { AddWorkspaceModal } from './add-workspace-modal';
 import { ConfirmModal } from './confirm-modal';
 import { LinkBuilderModal } from './link-builder-modal';
+import { EnhancedLinkBuilderModal } from './link-builder-modal-enhanced';
 
 export function ModalProviderIntegration() {
   return (
