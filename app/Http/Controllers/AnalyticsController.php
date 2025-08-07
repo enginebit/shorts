@@ -12,11 +12,11 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * DashboardController - Analytics Enhanced
+ * AnalyticsController - Analytics Enhanced
  *
  * Enhanced analytics method for Phase 3B implementation
  */
-final class DashboardController extends Controller
+final class AnalyticsController extends Controller
 {
     public function __construct(
         private readonly WorkspaceAuthService $workspaceAuthService
@@ -84,7 +84,7 @@ final class DashboardController extends Controller
         $uniqueVisitors = $links->sum('unique_clicks');
 
         // Get previous period for comparison
-        $prevStartDate = $startDate->copy()->sub($endDate->diffInDays($startDate), 'days');
+        $prevStartDate = $startDate->copy()->subDays($endDate->diffInDays($startDate));
         $prevLinks = $workspace->links()
             ->whereBetween('created_at', [$prevStartDate, $startDate])
             ->get();

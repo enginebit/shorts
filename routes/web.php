@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AnalyticsController;use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -70,7 +70,7 @@ Route::middleware(['auth', 'workspace'])->group(function () {
         ->name('workspace.links');
 
     // Workspace analytics
-    Route::get('/{workspace}/analytics', [DashboardController::class, 'analytics'])
+    Route::get('/{workspace}/analytics', [AnalyticsController::class, 'analytics'])
         ->where('workspace', '^(?!api$|admin$|www$|mail$|ftp$|storage$|sanctum$|up$)[a-zA-Z0-9_-]+$')
         ->name('workspace.analytics');
 
