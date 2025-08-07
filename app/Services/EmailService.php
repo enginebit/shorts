@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Mail;
  * Integrates with Resend for reliable email delivery
  * Following dub-main email patterns and best practices
  */
-final class EmailService
+class EmailService
 {
     /**
      * Send welcome email to new user

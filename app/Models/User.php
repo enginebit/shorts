@@ -202,4 +202,11 @@ final class User extends Authenticatable
     {
         return $this->getAuthAssuranceLevel() === 'aal2';
     }
-}
+
+    /**
+     * Get the password for authentication.
+     */
+    public function getAuthPassword(): string
+    {
+        return $this->password_hash;
+    }}
