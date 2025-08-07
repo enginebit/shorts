@@ -279,7 +279,6 @@ final class DashboardController extends Controller
             ],
         ]);
     }
-}
 
     /**
      * Get analytics data for workspace
@@ -367,3 +366,4 @@ final class DashboardController extends Controller
             })->values()->toArray(),
         ];
     }
+}
