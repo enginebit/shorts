@@ -8,6 +8,7 @@
 import { ReactNode } from 'react';
 import { MainNav, Sidebar } from '@/components/ui';
 import { ModalProvider } from '@/contexts/modal-context';
+import { WorkspaceProvider } from '@/contexts/workspace-context';
 import { ModalProviderIntegration } from '@/components/modals/modal-provider-integration';
 
 interface AppLayoutProps {
@@ -17,15 +18,17 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, className }: AppLayoutProps) {
   return (
-    <ModalProvider>
-      <MainNav sidebar={Sidebar}>
-        <div className={className}>
-          {children}
-        </div>
-      </MainNav>
-      
-      {/* Modal Components - Rendered at app level */}
-      <ModalProviderIntegration />
-    </ModalProvider>
+    <WorkspaceProvider>
+      <ModalProvider>
+        <MainNav sidebar={Sidebar}>
+          <div className={className}>
+            {children}
+          </div>
+        </MainNav>
+        
+        {/* Modal Components - Rendered at app level */}
+        <ModalProviderIntegration />
+      </ModalProvider>
+    </WorkspaceProvider>
   );
 }
