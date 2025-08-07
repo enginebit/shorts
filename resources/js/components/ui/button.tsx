@@ -15,28 +15,39 @@ import { ReactNode, forwardRef } from 'react';
 import { LoadingSpinner } from './loading-spinner';
 import { Tooltip } from './tooltip';
 
-export const buttonVariants = cva('transition-all', {
-  variants: {
-    variant: {
-      primary:
-        'border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800 hover:ring-4 hover:ring-neutral-200',
-      secondary: cn(
-        'border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50 focus-visible:border-neutral-300 outline-none',
-        'data-[state=open]:border-neutral-300 data-[state=open]:ring-4 data-[state=open]:ring-neutral-100',
-      ),
-      outline: 'border-transparent text-neutral-700 hover:bg-neutral-100',
-      success:
-        'border-green-500 bg-green-500 text-white hover:bg-green-600 hover:ring-4 hover:ring-green-100',
-      danger:
-        'border-red-500 bg-red-500 text-white hover:bg-red-600 hover:ring-4 hover:ring-red-100',
-      'danger-outline':
-        'border-transparent bg-white text-red-500 hover:bg-red-600 hover:text-white',
+export const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        primary:
+          'bg-neutral-900 text-neutral-50 hover:bg-neutral-900/90 border border-neutral-900',
+        secondary: cn(
+          'border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50 focus-visible:border-neutral-300 outline-none',
+          'data-[state=open]:border-neutral-300 data-[state=open]:ring-4 data-[state=open]:ring-neutral-100',
+        ),
+        outline: 'border border-neutral-200 bg-transparent text-neutral-700 hover:bg-neutral-100',
+        success:
+          'border-green-500 bg-green-500 text-white hover:bg-green-600 hover:ring-4 hover:ring-green-100',
+        danger:
+          'border-red-500 bg-red-500 text-white hover:bg-red-600 hover:ring-4 hover:ring-red-100',
+        'danger-outline':
+          'border-transparent bg-white text-red-500 hover:bg-red-600 hover:text-white',
+        ghost: 'hover:bg-neutral-100 hover:text-neutral-900',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+        icon: 'h-10 w-10',
+      },
     },
-  },
-  defaultVariants: {
-    variant: 'primary',
-  },
-});
+    defaultVariants: {
+      variant: 'primary',
+      size: 'default',
+    },
+  }
+);
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,

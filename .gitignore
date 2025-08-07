@@ -46,38 +46,49 @@ config/local.php
 config/production.php
 
 # -----------------------------------------------------------------------------
-# Laravel Backend Exclusions
+# Laravel Application Exclusions (Root Level)
 # -----------------------------------------------------------------------------
 # Laravel cache and storage
-/backend/bootstrap/cache/*.php
-/backend/storage/app/*
-!/backend/storage/app/.gitkeep
-!/backend/storage/app/public/
-/backend/storage/framework/cache/*
-!/backend/storage/framework/cache/.gitkeep
-/backend/storage/framework/sessions/*
-!/backend/storage/framework/sessions/.gitkeep
-/backend/storage/framework/views/*
-!/backend/storage/framework/views/.gitkeep
-/backend/storage/logs/*
-!/backend/storage/logs/.gitkeep
+/bootstrap/cache/*.php
+/storage/app/*
+!/storage/app/.gitkeep
+!/storage/app/public/
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
 
 # Laravel build outputs
-/backend/public/build/
-/backend/public/hot
-/backend/public/storage
-/backend/public/mix-manifest.json
+/public/build/
+/public/hot
+/public/storage
+/public/mix-manifest.json
 
 # Laravel IDE helper files
-/backend/_ide_helper.php
-/backend/_ide_helper_models.php
-/backend/.phpstorm.meta.php
+/_ide_helper.php
+/_ide_helper_models.php
+/.phpstorm.meta.php
 
 # Laravel Telescope
-/backend/storage/telescope/
+/storage/telescope/
 
 # Laravel Horizon
-/backend/storage/horizon/
+/storage/horizon/
+
+# Laravel specific files
+/auth.json
+/.fleet
+/.nova
+/.zed
+/.phpactor.json
+/storage/*.key
+/storage/pail
+Homestead.json
+Homestead.yaml
 
 # -----------------------------------------------------------------------------
 # React/Frontend Exclusions
@@ -191,16 +202,13 @@ $RECYCLE.BIN/
 # Testing & Coverage
 # -----------------------------------------------------------------------------
 # Coverage reports
-/backend/coverage/
-/frontend/coverage/
 /coverage/
 *.lcov
 .nyc_output/
 
 # PHPUnit
-/backend/phpunit.xml
-/backend/.phpunit.result.cache
-/backend/.phpunit.cache/
+.phpunit.result.cache
+.phpunit.cache/
 
 # Jest
 jest.config.js.backup
@@ -228,7 +236,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Laravel logs
-/backend/storage/logs/*.log
+/storage/logs/*.log
 
 # Debug files
 *.pid

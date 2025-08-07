@@ -1,6 +1,36 @@
 {
+  "_app-layout-BavMse0Q.js": {
+    "file": "assets/app-layout-BavMse0Q.js",
+    "name": "app-layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_workspace-context-B_sRN992.js"
+    ]
+  },
+  "_auth-alternative-banner-30xtGeoI.js": {
+    "file": "assets/auth-alternative-banner-30xtGeoI.js",
+    "name": "auth-alternative-banner",
+    "imports": [
+      "resources/js/app.tsx"
+    ]
+  },
+  "_auth-layout-D-nAZSzI.js": {
+    "file": "assets/auth-layout-D-nAZSzI.js",
+    "name": "auth-layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_workspace-context-B_sRN992.js"
+    ]
+  },
+  "_workspace-context-B_sRN992.js": {
+    "file": "assets/workspace-context-B_sRN992.js",
+    "name": "workspace-context",
+    "imports": [
+      "resources/js/app.tsx"
+    ]
+  },
   "resources/css/app.css": {
-    "file": "assets/app-tn0RQdqM.css",
+    "file": "assets/app-Bi3FVALv.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -8,27 +38,121 @@
     ]
   },
   "resources/js/app.tsx": {
-    "file": "assets/app-FCHrMnU3.js",
+    "file": "assets/app-3ftoulJX.js",
     "name": "app",
     "src": "resources/js/app.tsx",
     "isEntry": true,
     "dynamicImports": [
+      "resources/js/pages/auth/forgot-password.tsx",
+      "resources/js/pages/auth/login.tsx",
+      "resources/js/pages/auth/register.tsx",
+      "resources/js/pages/auth/reset-password.tsx",
+      "resources/js/pages/dashboard.tsx",
+      "resources/js/pages/onboarding/index.tsx",
       "resources/js/pages/welcome.tsx"
     ],
     "css": [
-      "assets/app-tn0RQdqM.css"
+      "assets/app-Bi3FVALv.css"
+    ]
+  },
+  "resources/js/pages/auth/forgot-password.tsx": {
+    "file": "assets/forgot-password-JBaLhH6O.js",
+    "name": "forgot-password",
+    "src": "resources/js/pages/auth/forgot-password.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_auth-layout-D-nAZSzI.js",
+      "_workspace-context-B_sRN992.js"
+    ],
+    "css": [
+      "assets/app-Bi3FVALv.css"
+    ]
+  },
+  "resources/js/pages/auth/login.tsx": {
+    "file": "assets/login-BCGT1S37.js",
+    "name": "login",
+    "src": "resources/js/pages/auth/login.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_auth-layout-D-nAZSzI.js",
+      "_workspace-context-B_sRN992.js",
+      "_auth-alternative-banner-30xtGeoI.js"
+    ],
+    "css": [
+      "assets/app-Bi3FVALv.css"
+    ]
+  },
+  "resources/js/pages/auth/register.tsx": {
+    "file": "assets/register-4tgHayQd.js",
+    "name": "register",
+    "src": "resources/js/pages/auth/register.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_auth-layout-D-nAZSzI.js",
+      "_workspace-context-B_sRN992.js",
+      "_auth-alternative-banner-30xtGeoI.js"
+    ],
+    "css": [
+      "assets/app-Bi3FVALv.css"
+    ]
+  },
+  "resources/js/pages/auth/reset-password.tsx": {
+    "file": "assets/reset-password-CfMGZYYU.js",
+    "name": "reset-password",
+    "src": "resources/js/pages/auth/reset-password.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_auth-layout-D-nAZSzI.js",
+      "_workspace-context-B_sRN992.js"
+    ],
+    "css": [
+      "assets/app-Bi3FVALv.css"
+    ]
+  },
+  "resources/js/pages/dashboard.tsx": {
+    "file": "assets/dashboard-BYe3SNfV.js",
+    "name": "dashboard",
+    "src": "resources/js/pages/dashboard.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-layout-BavMse0Q.js",
+      "_workspace-context-B_sRN992.js"
+    ],
+    "css": [
+      "assets/app-Bi3FVALv.css"
+    ]
+  },
+  "resources/js/pages/onboarding/index.tsx": {
+    "file": "assets/index-CMSM5_zb.js",
+    "name": "index",
+    "src": "resources/js/pages/onboarding/index.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.tsx",
+      "_workspace-context-B_sRN992.js",
+      "_auth-layout-D-nAZSzI.js"
+    ],
+    "css": [
+      "assets/app-Bi3FVALv.css"
     ]
   },
   "resources/js/pages/welcome.tsx": {
-    "file": "assets/welcome-C1CMos3p.js",
+    "file": "assets/welcome-DkMXnD3T.js",
     "name": "welcome",
     "src": "resources/js/pages/welcome.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.tsx"
+      "resources/js/app.tsx",
+      "_app-layout-BavMse0Q.js",
+      "_workspace-context-B_sRN992.js"
     ],
     "css": [
-      "assets/app-tn0RQdqM.css"
+      "assets/app-Bi3FVALv.css"
     ]
   }
 }

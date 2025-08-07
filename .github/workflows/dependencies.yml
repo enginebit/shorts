@@ -1,0 +1,277 @@
+name: Dependencies
+
+on:
+  schedule:
+    # Run dependency updates weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-composer-dependencies:
+    runs-on: ubuntu-latest
+    name: Update Composer Dependencies
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Update Composer dependencies
+        run: |
+          composer update --no-progress --prefer-dist --optimize-autoloader
+          composer normalize
+
+      - name: Check for security vulnerabilities
+        run: composer audit
+
+      - name: Run tests with updated dependencies
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan test --testsuite=Unit
+
+      - name: Create Pull Request for Composer updates
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update Composer dependencies'
+          title: 'chore: Update Composer Dependencies'
+          body: |
+            ## Composer Dependencies Update
+            
+            This PR updates Composer dependencies to their latest versions.
+            
+            ### Changes
+            - Updated all Composer dependencies
+            - Ran security audit
+            - Verified tests pass with updated dependencies
+            
+            ### Testing
+            - [x] Unit tests pass
+            - [x] No security vulnerabilities detected
+            
+            Please review the changes and merge if everything looks good.
+          branch: chore/update-composer-dependencies
+          delete-branch: true
+
+  update-npm-dependencies:
+    runs-on: ubuntu-latest
+    name: Update NPM Dependencies
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update NPM dependencies
+        run: |
+          npx npm-check-updates -u
+          npm install
+
+      - name: Check for security vulnerabilities
+        run: npm audit --audit-level=moderate
+
+      - name: Run TypeScript type checking
+        run: npx tsc --noEmit
+
+      - name: Run frontend tests
+        run: npm run test:frontend:run
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Create Pull Request for NPM updates
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update NPM dependencies'
+          title: 'chore: Update NPM Dependencies'
+          body: |
+            ## NPM Dependencies Update
+            
+            This PR updates NPM dependencies to their latest versions.
+            
+            ### Changes
+            - Updated all NPM dependencies
+            - Ran security audit
+            - Verified TypeScript compilation
+            - Verified frontend tests pass
+            - Verified build process works
+            
+            ### Testing
+            - [x] TypeScript compilation successful
+            - [x] Frontend tests pass
+            - [x] Build process successful
+            - [x] No security vulnerabilities detected
+            
+            Please review the changes and merge if everything looks good.
+          branch: chore/update-npm-dependencies
+          delete-branch: true
+
+  security-updates:
+    runs-on: ubuntu-latest
+    name: Security Updates
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Check Composer security
+        id: composer-audit
+        run: |
+          if composer audit --format=json > composer-audit.json; then
+            echo "composer-secure=true" >> $GITHUB_OUTPUT
+          else
+            echo "composer-secure=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check NPM security
+        id: npm-audit
+        run: |
+          if npm audit --audit-level=high --json > npm-audit.json; then
+            echo "npm-secure=true" >> $GITHUB_OUTPUT
+          else
+            echo "npm-secure=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update vulnerable Composer packages
+        if: steps.composer-audit.outputs.composer-secure == 'false'
+        run: |
+          # Extract vulnerable packages and update them
+          composer update --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Update vulnerable NPM packages
+        if: steps.npm-audit.outputs.npm-secure == 'false'
+        run: |
+          # Fix vulnerabilities automatically
+          npm audit fix
+
+      - name: Run tests after security updates
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan test --testsuite=Unit
+          npm run test:frontend:run
+
+      - name: Create security update PR
+        if: steps.composer-audit.outputs.composer-secure == 'false' || steps.npm-audit.outputs.npm-secure == 'false'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'security: update vulnerable dependencies'
+          title: '🔒 Security: Update Vulnerable Dependencies'
+          body: |
+            ## Security Dependencies Update
+            
+            This PR addresses security vulnerabilities in dependencies.
+            
+            ### Security Issues Fixed
+            - Composer vulnerabilities: ${{ steps.composer-audit.outputs.composer-secure == 'false' && '❌ Found and fixed' || '✅ None found' }}
+            - NPM vulnerabilities: ${{ steps.npm-audit.outputs.npm-secure == 'false' && '❌ Found and fixed' || '✅ None found' }}
+            
+            ### Testing
+            - [x] Unit tests pass
+            - [x] Frontend tests pass
+            - [x] Security audits pass
+            
+            **This is a security update and should be reviewed and merged promptly.**
+          branch: security/update-vulnerable-dependencies
+          delete-branch: true
+          labels: |
+            security
+            dependencies
+            high-priority
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    name: Dependency Health Check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          composer install --no-progress --prefer-dist --optimize-autoloader
+          npm ci
+
+      - name: Analyze Composer dependencies
+        run: |
+          echo "## Composer Dependency Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "### Outdated Packages" >> $GITHUB_STEP_SUMMARY
+          composer outdated --direct --format=json | jq -r '.installed[] | "- \(.name): \(.version) → \(.latest)"' >> $GITHUB_STEP_SUMMARY || echo "All packages are up to date" >> $GITHUB_STEP_SUMMARY
+
+      - name: Analyze NPM dependencies
+        run: |
+          echo "## NPM Dependency Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "### Outdated Packages" >> $GITHUB_STEP_SUMMARY
+          npm outdated --json | jq -r 'to_entries[] | "- \(.key): \(.value.current) → \(.value.latest)"' >> $GITHUB_STEP_SUMMARY || echo "All packages are up to date" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for unused dependencies
+        run: |
+          echo "### Unused Dependencies" >> $GITHUB_STEP_SUMMARY
+          npx depcheck --json | jq -r '.dependencies[]' | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY || echo "No unused dependencies found" >> $GITHUB_STEP_SUMMARY
+
+      - name: License compliance check
+        run: |
+          echo "### License Compliance" >> $GITHUB_STEP_SUMMARY
+          npx license-checker --json | jq -r 'to_entries[] | select(.value.licenses | type == "string" and (. | test("GPL|AGPL|LGPL") and (. | test("MIT|Apache|BSD") | not))) | "⚠️ \(.key): \(.value.licenses)"' >> $GITHUB_STEP_SUMMARY || echo "✅ All licenses are compliant" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate dependency report
+        run: |
+          echo "### Dependency Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "- Composer packages: $(composer show --installed | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "- NPM packages: $(npm list --depth=0 --json | jq '.dependencies | length')" >> $GITHUB_STEP_SUMMARY
+          echo "- Total bundle size: $(du -sh public/build 2>/dev/null | cut -f1 || echo 'Not built')" >> $GITHUB_STEP_SUMMARY

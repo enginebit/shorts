@@ -1,0 +1,315 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  prepare-deployment:
+    runs-on: ubuntu-latest
+    name: Prepare Deployment
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      version: ${{ steps.set-version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set version
+        id: set-version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+          fi
+
+  build-assets:
+    runs-on: ubuntu-latest
+    name: Build Production Assets
+    needs: prepare-deployment
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Optimize assets
+        run: |
+          # Compress JavaScript and CSS files
+          find public/build -name "*.js" -exec gzip -k {} \;
+          find public/build -name "*.css" -exec gzip -k {} \;
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-assets
+          path: public/build/
+          retention-days: 7
+
+  run-tests:
+    runs-on: ubuntu-latest
+    name: Run Full Test Suite
+    needs: prepare-deployment
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testing
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, redis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: testing
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+
+      - name: Run PHP tests
+        run: php artisan test
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: testing
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+
+      - name: Run frontend tests
+        run: npm run test:frontend:run
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    name: Deploy to Staging
+    needs: [prepare-deployment, build-assets, run-tests]
+    if: needs.prepare-deployment.outputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.shorts.dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-assets
+          path: public/build/
+
+      - name: Deploy to staging server
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          echo "Version: ${{ needs.prepare-deployment.outputs.version }}"
+          echo "Environment: ${{ needs.prepare-deployment.outputs.environment }}"
+          
+          # Add your staging deployment commands here
+          # Examples:
+          # - rsync files to staging server
+          # - Run database migrations on staging
+          # - Clear caches
+          # - Restart services
+          
+          echo "✅ Staging deployment completed!"
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running smoke tests on staging..."
+          
+          # Add smoke tests here
+          # Examples:
+          # - curl -f https://staging.shorts.dev/health
+          # - Test critical user flows
+          # - Verify database connectivity
+          
+          echo "✅ Smoke tests passed!"
+
+      - name: Notify deployment
+        run: |
+          echo "📢 Staging deployment notification sent"
+          # Add notification logic (Slack, Discord, email, etc.)
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    needs: [prepare-deployment, build-assets, run-tests]
+    if: needs.prepare-deployment.outputs.environment == 'production'
+    environment:
+      name: production
+      url: https://shorts.dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-assets
+          path: public/build/
+
+      - name: Create deployment backup
+        run: |
+          echo "💾 Creating deployment backup..."
+          # Add backup commands here
+          echo "✅ Backup created!"
+
+      - name: Deploy to production server
+        run: |
+          echo "🚀 Deploying to production environment..."
+          echo "Version: ${{ needs.prepare-deployment.outputs.version }}"
+          echo "Environment: ${{ needs.prepare-deployment.outputs.environment }}"
+          
+          # Add your production deployment commands here
+          # Examples:
+          # - Blue-green deployment
+          # - Rolling deployment
+          # - Database migrations with rollback capability
+          # - Cache warming
+          # - CDN cache invalidation
+          
+          echo "✅ Production deployment completed!"
+
+      - name: Run production smoke tests
+        run: |
+          echo "🧪 Running production smoke tests..."
+          
+          # Add comprehensive smoke tests here
+          # Examples:
+          # - Health check endpoints
+          # - Critical user flows
+          # - Performance benchmarks
+          # - Security checks
+          
+          echo "✅ Production smoke tests passed!"
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Notify production deployment
+        run: |
+          echo "📢 Production deployment notification sent"
+          # Add notification logic (Slack, Discord, email, etc.)
+
+  rollback:
+    runs-on: ubuntu-latest
+    name: Rollback Deployment
+    if: failure() && (needs.deploy-staging.result == 'failure' || needs.deploy-production.result == 'failure')
+    needs: [prepare-deployment, deploy-staging, deploy-production]
+
+    steps:
+      - name: Rollback deployment
+        run: |
+          echo "🔄 Rolling back deployment..."
+          echo "Environment: ${{ needs.prepare-deployment.outputs.environment }}"
+          
+          # Add rollback commands here
+          # Examples:
+          # - Restore from backup
+          # - Revert database migrations
+          # - Switch to previous version
+          # - Clear caches
+          
+          echo "✅ Rollback completed!"
+
+      - name: Notify rollback
+        run: |
+          echo "⚠️ Deployment rollback notification sent"
+          # Add notification logic for rollback

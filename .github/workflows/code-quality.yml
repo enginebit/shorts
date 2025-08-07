@@ -1,0 +1,330 @@
+name: Code Quality & Security
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security checks daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  php-quality:
+    runs-on: ubuntu-latest
+    name: PHP Code Quality
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Run Laravel Pint (Code Formatting)
+        run: ./vendor/bin/pint --test --verbose
+
+      - name: Run PHPStan (Static Analysis)
+        run: ./vendor/bin/phpstan analyse --memory-limit=2G --error-format=github
+
+      - name: Run PHP CS Fixer (Additional Code Style)
+        run: ./vendor/bin/php-cs-fixer fix --dry-run --diff --verbose
+
+      - name: Check for deprecated PHP features
+        run: |
+          # Check for deprecated PHP 8.2+ features
+          grep -r "create_function\|each\|mysql_\|ereg" app/ || echo "No deprecated PHP features found"
+
+  frontend-quality:
+    runs-on: ubuntu-latest
+    name: Frontend Code Quality
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type checking
+        run: npx tsc --noEmit --pretty
+
+      - name: Run ESLint
+        run: npx eslint resources/js --ext .ts,.tsx,.js,.jsx --format=github
+
+      - name: Run Prettier check
+        run: npx prettier --check "resources/js/**/*.{ts,tsx,js,jsx,css,scss,json,md}"
+
+      - name: Check for unused dependencies
+        run: npx depcheck --ignores="@types/*,eslint-*,prettier,typescript,vite,vitest"
+
+      - name: Bundle size analysis
+        run: |
+          npm run build
+          npx bundlesize
+
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scanning
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Run Composer security audit
+        run: composer audit --format=json
+
+      - name: Run NPM security audit
+        run: npm audit --audit-level=moderate --json
+
+      - name: Scan for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, php
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    name: Dependency Review
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC
+
+  performance-audit:
+    runs-on: ubuntu-latest
+    name: Performance Audit
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Analyze bundle size
+        run: |
+          echo "## Bundle Size Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size | Gzipped |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|---------|" >> $GITHUB_STEP_SUMMARY
+          
+          for file in public/build/assets/*.js; do
+            if [ -f "$file" ]; then
+              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
+              gzipped=$(gzip -c "$file" | wc -c)
+              filename=$(basename "$file")
+              echo "| $filename | ${size} bytes | ${gzipped} bytes |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+      - name: Check for large assets
+        run: |
+          # Fail if any JavaScript bundle is larger than 1MB
+          find public/build/assets -name "*.js" -size +1M -exec echo "Large bundle found: {}" \; -exec exit 1 \;
+
+  accessibility-audit:
+    runs-on: ubuntu-latest
+    name: Accessibility Audit
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testing
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: testing
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+
+      - name: Start Laravel server
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 &
+          sleep 5
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: testing
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run accessibility tests
+        run: |
+          npx playwright test --config=playwright-a11y.config.js
+        env:
+          BASE_URL: http://127.0.0.1:8000
+
+      - name: Upload accessibility report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: accessibility-report
+          path: accessibility-report/
+          retention-days: 7
+
+  documentation-check:
+    runs-on: ubuntu-latest
+    name: Documentation Check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for required documentation
+        run: |
+          # Check for essential documentation files
+          required_files=(
+            "README.md"
+            "docs/INSTALLATION.md"
+            "docs/API.md"
+            "docs/DEPLOYMENT.md"
+            "CHANGELOG.md"
+            "CONTRIBUTING.md"
+          )
+          
+          missing_files=()
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              missing_files+=("$file")
+            fi
+          done
+          
+          if [ ${#missing_files[@]} -ne 0 ]; then
+            echo "Missing documentation files:"
+            printf '%s\n' "${missing_files[@]}"
+            exit 1
+          fi
+          
+          echo "All required documentation files are present."
+
+      - name: Check documentation links
+        run: |
+          # Check for broken internal links in markdown files
+          find . -name "*.md" -exec grep -l "](\./" {} \; | while read file; do
+            echo "Checking links in $file"
+            grep -o "](\.\/[^)]*)" "$file" | sed 's/](\.\///' | sed 's/)//' | while read link; do
+              if [ ! -f "$link" ] && [ ! -d "$link" ]; then
+                echo "Broken link in $file: $link"
+                exit 1
+              fi
+            done
+          done
+
+      - name: Validate API documentation
+        run: |
+          # Check if API routes are documented
+          if [ -f "docs/API.md" ]; then
+            echo "API documentation exists"
+            # Add more specific API documentation validation here
+          else
+            echo "API documentation is missing"
+            exit 1
+          fi

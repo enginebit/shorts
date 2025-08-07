@@ -7,8 +7,9 @@
 
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui';
+import { Button, PageHeader, PageWidthWrapper } from '@/components/ui';
 import { PageProps } from '@/types';
+import { route } from 'ziggy-js';
 
 export default function Dashboard({ auth }: PageProps) {
   const { post, processing } = useForm();
@@ -21,27 +22,27 @@ export default function Dashboard({ auth }: PageProps) {
     <AppLayout>
       <Head title="Dashboard" />
 
-      <div className="py-12">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-            <div className="p-6 text-gray-900">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Welcome back, {auth.user.name}!
-                  </h1>
-                  <p className="text-gray-600 mt-2">
-                    You're successfully logged in to your Shorts account.
-                  </p>
-                </div>
-                
-                <Button
-                  variant="secondary"
-                  text="Logout"
-                  loading={processing}
-                  onClick={logout}
-                />
-              </div>
+      <PageHeader
+        title="Dashboard"
+        controls={
+          <Button
+            variant="secondary"
+            text="Logout"
+            loading={processing}
+            onClick={logout}
+          />
+        }
+      >
+        <PageWidthWrapper>
+          <div className="py-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Welcome back, {auth.user.name}!
+              </h2>
+              <p className="text-gray-600">
+                You're successfully logged in to your Shorts account.
+              </p>
+            </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -96,10 +97,9 @@ export default function Dashboard({ auth }: PageProps) {
                   </Link>
                 </div>
               </div>
-            </div>
           </div>
-        </div>
-      </div>
+        </PageWidthWrapper>
+      </PageHeader>
     </AppLayout>
   );
 }

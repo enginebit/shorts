@@ -1,0 +1,46 @@
+parameters:
+    level: 8
+    paths:
+        - app
+        - config
+        - database
+        - routes
+        - tests
+
+    # Laravel specific configuration
+    bootstrapFiles:
+        - vendor/larastan/larastan/bootstrap.php
+
+    # Exclude patterns
+    excludePaths:
+        - bootstrap/cache/*
+        - storage/*
+        - vendor/*
+        - node_modules/*
+        - public/build/*
+
+    # Ignore specific errors
+    ignoreErrors:
+        # Laravel specific ignores
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder#'
+        - '#Call to an undefined method Illuminate\\Database\\Query\\Builder#'
+        - '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model#'
+        - '#Call to an undefined method Illuminate\\Http\\Request#'
+
+        # Inertia.js specific ignores
+        - '#Call to an undefined method Inertia\\Response#'
+
+        # Test specific ignores
+        - '#Call to an undefined method Tests\\.*#'
+        - '#Access to an undefined property Tests\\.*#'
+
+        # Temporary ignores for migration
+        - '#Parameter .* of method .* has no value type specified in iterable type array#'
+        - '#Method .* has no return type specified#'
+        - '#Property .* has no type specified#'
+
+    # Laravel specific rules
+    reportUnmatchedIgnoredErrors: false
+
+includes:
+    - vendor/larastan/larastan/extension.neon
