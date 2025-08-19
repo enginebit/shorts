@@ -1,8 +1,8 @@
 /**
  * SignUpEmail Component
- * 
+ *
  * Migrated from: /Users/yasinboelhouwer/shorts/dub-main/apps/web/ui/auth/register/signup-email.tsx
- * 
+ *
  * Adaptations for Laravel + Inertia.js:
  * - Replaced react-hook-form with Inertia.js useForm
  * - Simplified validation to use Laravel backend validation
@@ -14,15 +14,16 @@ import { Button, Input } from '@/components/ui';
 import { useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
+import { useRegisterContext } from '@/contexts/register-context';
+import { toast } from 'sonner';
 
 export const SignUpEmail = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const { setStep, setEmail, setPassword, email } = useRegisterContext();
 
   const { data, setData, post, processing, errors } = useForm({
-    name: '',
-    email: '',
+    email: email || '',
     password: '',
-    password_confirmation: '',
   });
 
   const onSubmit = (e: FormEvent) => {
@@ -34,11 +35,18 @@ export const SignUpEmail = () => {
       return;
     }
 
-    // Submit the registration form
-    post(route('register'), {
+    // Send OTP for email verification
+    post(route('auth.send-otp'), {
+      email: data.email,
+      password: data.password,
+      onSuccess: () => {
+        setEmail(data.email);
+        setPassword(data.password);
+        setStep('verify');
+        toast.success('Verification code sent to your email!');
+      },
       onError: (errors) => {
-        // Handle validation errors
-        console.error('Registration errors:', errors);
+        toast.error(errors.email || errors.password || 'Failed to send verification code');
       },
     });
   };
@@ -48,22 +56,6 @@ export const SignUpEmail = () => {
       <div className="flex flex-col gap-y-6">
         <label>
           <span className="text-content-emphasis mb-2 block text-sm font-medium leading-none">
-            Name
-          </span>
-          <Input
-            type="text"
-            placeholder="Your name"
-            autoComplete="name"
-            required
-            autoFocus={!showPassword}
-            value={data.name}
-            onChange={(e) => setData('name', e.target.value)}
-            error={errors.name}
-          />
-        </label>
-
-        <label>
-          <span className="text-content-emphasis mb-2 block text-sm font-medium leading-none">
             Email
           </span>
           <Input
@@ -71,6 +63,7 @@ export const SignUpEmail = () => {
             placeholder="panic@thedis.co"
             autoComplete="email"
             required
+            autoFocus={!showPassword}
             value={data.email}
             onChange={(e) => setData('email', e.target.value)}
             error={errors.email}
@@ -78,37 +71,21 @@ export const SignUpEmail = () => {
         </label>
 
         {showPassword && (
-          <>
-            <label>
-              <span className="text-content-emphasis mb-2 block text-sm font-medium leading-none">
-                Password
-              </span>
-              <Input
-                type="password"
-                required
-                autoFocus
-                value={data.password}
-                onChange={(e) => setData('password', e.target.value)}
-                error={errors.password}
-                minLength={8}
-                placeholder="Password (min. 8 characters)"
-              />
-            </label>
-
-            <label>
-              <span className="text-content-emphasis mb-2 block text-sm font-medium leading-none">
-                Confirm Password
-              </span>
-              <Input
-                type="password"
-                required
-                value={data.password_confirmation}
-                onChange={(e) => setData('password_confirmation', e.target.value)}
-                error={errors.password_confirmation}
-                placeholder="Confirm your password"
-              />
-            </label>
-          </>
+          <label>
+            <span className="text-content-emphasis mb-2 block text-sm font-medium leading-none">
+              Password
+            </span>
+            <Input
+              type="password"
+              required
+              autoFocus
+              value={data.password}
+              onChange={(e) => setData('password', e.target.value)}
+              error={errors.password}
+              minLength={8}
+              placeholder="Password (min. 8 characters)"
+            />
+          </label>
         )}
 
         <Button

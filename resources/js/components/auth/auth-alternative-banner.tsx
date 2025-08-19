@@ -1,8 +1,8 @@
 /**
  * AuthAlternativeBanner Component
- * 
+ *
  * Migrated from: /Users/yasinboelhouwer/shorts/dub-main/apps/web/ui/auth/auth-alternative-banner.tsx
- * 
+ *
  * Adaptations for Laravel + Inertia.js:
  * - Replaced Next.js Link with Inertia Link
  * - Replaced DotsPattern with simple background pattern
@@ -25,7 +25,7 @@ export function AuthAlternativeBanner({
   return (
     <Link
       href={href}
-      className="relative block overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 px-2 py-4 transition-colors hover:bg-neutral-100"
+      className="relative block overflow-hidden rounded-lg border border-[rgb(var(--border-default))] bg-[rgb(var(--bg-muted))] px-2 py-4 transition-colors hover:bg-[rgb(var(--bg-subtle))]"
     >
       <div
         className="absolute inset-y-0 left-1/2 w-[640px] -translate-x-1/2"
@@ -48,16 +48,16 @@ export function AuthAlternativeBanner({
                 height="20"
                 patternUnits="userSpaceOnUse"
               >
-                <circle cx="2" cy="2" r="1" fill="currentColor" className="text-neutral-200" />
+                <circle cx="2" cy="2" r="1" fill="currentColor" className="text-[rgb(var(--border-default))]" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#dots)" />
           </svg>
         </div>
       </div>
-      <div className="relative text-center text-sm text-neutral-600">
+      <div className="relative text-center text-sm text-[rgb(var(--content-subtle))]">
         <p>{text}</p>
-        <span className="block font-semibold text-neutral-800">{cta}</span>
+        <span className="block font-semibold text-[rgb(var(--content-emphasis))]">{cta}</span>
       </div>
     </Link>
   );

@@ -1,8 +1,8 @@
 /**
  * Input Component
- * 
+ *
  * Migrated from: /Users/yasinboelhouwer/shorts/dub-main/packages/ui/src/input.tsx
- * 
+ *
  * Adaptations for Laravel + Inertia.js:
  * - Replaced @dub/utils with local utils
  * - Replaced custom Eye icons with Lucide React icons
@@ -38,6 +38,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 'border-red-500 focus:border-red-500 focus:ring-red-500',
               className,
             )}
+            aria-invalid={props.error ? true : undefined}
+            aria-describedby={props.error && props.id ? `${props.id}-error` : undefined}
             ref={ref}
             {...props}
           />
@@ -86,6 +88,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         {props.error && (
           <span
+            id={props.id ? `${props.id}-error` : undefined}
             className="mt-2 block text-sm text-red-500"
             role="alert"
             aria-live="assertive"

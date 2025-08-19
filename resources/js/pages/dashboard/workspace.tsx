@@ -16,16 +16,15 @@
  * - Maintains exact visual consistency with dub-main
  */
 
+import React from 'react';
 import { Head } from '@inertiajs/react';
+import { formatNumber, formatDate } from '@/lib/format';
 import { Plus, BarChart3, Link as LinkIcon, Users, Globe } from 'lucide-react';
-import { AppLayout } from '@/layouts/app-layout';
-import { 
-  PageWidthWrapper, 
-  Button, 
-  CardList,
-  PageHeader 
-} from '@/components/ui';
+import AppLayout from '@/layouts/app-layout';
+import { PageWidthWrapper, Button, CardList } from '@/components/ui';
+import { PageHeader } from '@/components/navigation/page-header';
 import { useLinkBuilder } from '@/contexts/modal-context';
+import { AnimatedEmptyState } from '@/components/shared/animated-empty-state';
 import { useWorkspace } from '@/contexts/workspace-context';
 
 interface WorkspaceStats {
@@ -65,12 +64,12 @@ interface WorkspaceDashboardProps {
   workspace: WorkspaceData;
 }
 
-function StatsCard({ 
-  title, 
-  value, 
-  icon: Icon, 
+const StatsCard = React.memo(function StatsCard({
+  title,
+  value,
+  icon: Icon,
   description,
-  trend 
+  trend
 }: {
   title: string;
   value: string | number;
@@ -99,7 +98,7 @@ function StatsCard({
       )}
     </div>
   );
-}
+});
 
 function RecentLinksCard({ links }: { links: RecentLink[] }) {
   return (
@@ -108,7 +107,7 @@ function RecentLinksCard({ links }: { links: RecentLink[] }) {
         <h3 className="text-lg font-semibold text-neutral-900">Recent Links</h3>
         <p className="text-sm text-neutral-600">Your latest shortened links</p>
       </div>
-      
+
       <div className="p-6">
         {links.length > 0 ? (
           <CardList variant="loose">
@@ -133,12 +132,12 @@ function RecentLinksCard({ links }: { links: RecentLink[] }) {
                   </div>
                   <div className="flex items-center gap-4 text-sm text-neutral-500">
                     <div className="text-right">
-                      <p className="font-medium text-neutral-900">{link.clicks}</p>
+                      <p className="font-medium text-neutral-900">{formatNumber(link.clicks)}</p>
                       <p className="text-xs">clicks</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs">
-                        {new Date(link.createdAt).toLocaleDateString()}
+                        {formatDate(link.createdAt)}
                       </p>
                       <p className="text-xs">{link.user.name}</p>
                     </div>
@@ -148,13 +147,11 @@ function RecentLinksCard({ links }: { links: RecentLink[] }) {
             ))}
           </CardList>
         ) : (
-          <div className="text-center py-8">
-            <LinkIcon className="mx-auto h-12 w-12 text-neutral-400" />
-            <h3 className="mt-4 text-sm font-medium text-neutral-900">No links yet</h3>
-            <p className="mt-2 text-sm text-neutral-500">
-              Get started by creating your first short link.
-            </p>
-          </div>
+          <AnimatedEmptyState
+            title="No links yet"
+            description="Get started by creating your first short link."
+            cardContent={<LinkIcon className="mx-auto h-12 w-12 text-neutral-400" />}
+          />
         )}
       </div>
     </div>
@@ -167,7 +164,7 @@ function QuickActions() {
   return (
     <div className="rounded-lg border border-neutral-200 bg-white p-6">
       <h3 className="text-lg font-semibold text-neutral-900 mb-4">Quick Actions</h3>
-      
+
       <div className="space-y-3">
         <Button
           onClick={() => setShowLinkBuilder(true)}
@@ -177,7 +174,7 @@ function QuickActions() {
           <Plus className="h-4 w-4 mr-2" />
           Create New Link
         </Button>
-        
+
         <Button
           onClick={() => window.location.href = `/${window.location.pathname.split('/')[1]}/analytics`}
           className="w-full justify-start"
@@ -186,7 +183,7 @@ function QuickActions() {
           <BarChart3 className="h-4 w-4 mr-2" />
           View Analytics
         </Button>
-        
+
         <Button
           onClick={() => window.location.href = `/${window.location.pathname.split('/')[1]}/settings`}
           className="w-full justify-start"

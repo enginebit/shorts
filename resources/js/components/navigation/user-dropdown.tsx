@@ -33,7 +33,20 @@ export function UserDropdown() {
   const { post, processing } = useForm();
 
   const handleLogout = () => {
-    post(route('logout'));
+    console.log('Logout initiated from user dropdown');
+
+    post(route('logout'), {
+      onSuccess: () => {
+        console.log('Logout successful, should redirect to login');
+      },
+      onError: (errors) => {
+        console.error('Logout failed:', errors);
+      },
+      onFinish: () => {
+        console.log('Logout request finished');
+        setOpenPopover(false);
+      },
+    });
   };
 
   const getInitials = (name: string) => {

@@ -156,7 +156,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => env('SESSION_DOMAIN', (require __DIR__.'/domains.php')['session_domain'] ?? null),
 
     /*
     |--------------------------------------------------------------------------

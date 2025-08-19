@@ -16,7 +16,7 @@ import { Link, useForm, usePage, router } from '@inertiajs/react';
 import { useContext, useState, useEffect, useRef } from 'react';
 import { route } from 'ziggy-js';
 import { toast } from 'sonner';
-import { debugCSRFTokenState, ensureFreshCsrf } from '@/lib/csrf-utils';
+import { debugCSRFTokenState } from '@/lib/csrf-utils';
 import { errorCodes, LoginFormContext } from './login-form';
 
 export const EmailSignIn = ({ next }: { next?: string }) => {
@@ -148,61 +148,14 @@ export const EmailSignIn = ({ next }: { next?: string }) => {
   };
 
   const page = usePage();
-  const [csrfToken, setCsrfToken] = useState<string | null>(
-    ((page.props as any)?.csrf_token as string | undefined) ??
-    (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || null)
-  );
+  const csrfToken = (page.props as any)?.csrf_token ?? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
   const [submitting, setSubmitting] = useState(false);
-
-  // On mount (first visit), ensure XSRF cookie is set and refresh tokens
-  // Critical for multi-cycle authentication flows
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        // Always refresh CSRF for login page to handle multi-cycle flows
-        await ensureFreshCsrf();
-
-        // Get fresh token after ensuring cookie is set
-        const token = ((): string | null => {
-          try {
-            // @ts-ignore
-            return (window.Inertia?.page?.props?.csrf_token as string) || null;
-          } catch {
-            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || null;
-          }
-        })();
-
-        if (mounted) {
-          setCsrfToken(token);
-          console.log('Login component: CSRF token initialized', {
-            hasToken: !!token,
-            tokenPrefix: token?.substring(0, 10) + '...',
-            timestamp: new Date().toISOString()
-          });
-        }
-      } catch (error) {
-        console.warn('Login component: Failed to initialize CSRF token', error);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
 
   return (
     <>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-
-          // Synchronous canonical host guard to prevent posting to hyphenated hosts
-          if (typeof window !== 'undefined') {
-            const h = window.location.host;
-            if (h.includes('brachy-io') || h.includes('_')) {
-              const url = window.location.href.replace('brachy-io', 'brachy.io').replace(/_/g, '.');
-              window.location.replace(url);
-              return;
-            }
-          }
 
           // Check if the user can enter a password, and if so display the field
           if (!showPasswordField) {
@@ -246,34 +199,19 @@ export const EmailSignIn = ({ next }: { next?: string }) => {
 
           // Submit via Inertia router with explicit payload and CSRF token
           setSubmitting(true);
-
-          try {
-            // Ensure tokens are fresh just-in-time for auth attempt
-            // Critical for multi-cycle authentication flows
-            await ensureFreshCsrf();
-
-            // Prefer cookie-based XSRF header to avoid session/meta races
-            const xsrfMatch = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/);
-            const xsrfToken = xsrfMatch ? decodeURIComponent(xsrfMatch[1]) : undefined;
-
-            console.log('Login submission: Using XSRF cookie', {
-              hasCookie: !!xsrfToken,
-              cookiePrefix: xsrfToken?.substring(0, 10) + '...',
+          router.visit(route('login'), {
+            method: 'post',
+            data: {
               email: data.email,
-              timestamp: new Date().toISOString()
-            });
-
-            router.visit(route('login'), {
-              method: 'post',
-              data: {
-                email: data.email,
-                password: actualPassword,
-                remember: data.remember,
-              },
-              headers: {
-                ...(xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}),
-              },
-              preserveScroll: true,
+              password: actualPassword,
+              remember: data.remember,
+              _token: csrfToken,
+            },
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'X-XSRF-TOKEN': csrfToken,
+            },
+            preserveScroll: true,
             onSuccess: () => {
               setLastUsedAuthMethod('email');
               if (typeof window !== 'undefined') {
@@ -282,16 +220,6 @@ export const EmailSignIn = ({ next }: { next?: string }) => {
             },
             onError: (errors) => {
               setClickedMethod(undefined);
-
-              // Check for CSRF-related errors (419 Page Expired)
-              const errorString = JSON.stringify(errors);
-              if (errorString.includes('419') || errorString.includes('CSRF') || errorString.includes('expired')) {
-                console.warn('Login: Detected CSRF error, clearing token state for retry', errors);
-                setCsrfToken(null); // Force refresh on next attempt
-                toast.error('Session expired. Please try logging in again.');
-                return;
-              }
-
               if ((errors as any).email) {
                 toast.error((errors as any).email as string);
               } else if ((errors as any).password) {
@@ -304,11 +232,6 @@ export const EmailSignIn = ({ next }: { next?: string }) => {
               setSubmitting(false);
             },
           });
-          } catch (error) {
-            setSubmitting(false);
-            console.error('Login submission error:', error);
-            toast.error('An unexpected error occurred. Please try again.');
-          }
         }}
         className="flex flex-col gap-y-6"
       >
@@ -389,15 +312,14 @@ export const EmailSignIn = ({ next }: { next?: string }) => {
         )}
 
         <Button
-          type="submit"
           text={`Log in with ${data.password ? 'password' : 'email'}`}
-          onClick={(e) => {
-            // Allow overlays to click the button but rely on native form submission
-            try {
-              const form = (e.currentTarget as HTMLButtonElement).form;
-              if (form) form.requestSubmit();
-            } catch {}
-          }}
+          {...(authMethod !== 'email' && {
+            type: 'button',
+            onClick: (e) => {
+              e.preventDefault();
+              // setAuthMethod('email');
+            },
+          })}
           loading={clickedMethod === 'email' || isCheckingAccount || submitting}
           disabled={clickedMethod && clickedMethod !== 'email'}
         />

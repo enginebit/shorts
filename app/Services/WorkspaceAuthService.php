@@ -105,7 +105,8 @@ final class WorkspaceAuthService
     {
         // Remove domain and query parameters
         $path = parse_url($url, PHP_URL_PATH) ?? '';
-        $segments = array_filter(explode('/', $path));
+        // Reindex to avoid undefined offset when leading slash produces empty segment
+        $segments = array_values(array_filter(explode('/', $path)));
 
         if (empty($segments)) {
             return false;
@@ -129,7 +130,8 @@ final class WorkspaceAuthService
     private function extractWorkspaceSlugFromUrl(string $url): ?string
     {
         $path = parse_url($url, PHP_URL_PATH) ?? '';
-        $segments = array_filter(explode('/', $path));
+        // Reindex to avoid undefined offset when leading slash produces empty segment
+        $segments = array_values(array_filter(explode('/', $path)));
 
         if (empty($segments)) {
             return null;

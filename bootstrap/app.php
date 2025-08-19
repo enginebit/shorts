@@ -16,8 +16,18 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add security headers to all responses
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
-        // Inertia.js middleware for web routes
-        $middleware->web(append: [
+        // Web middleware (order matters)
+        $middleware->web(prepend: [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+
+            // Canonicalize hyphenated hostnames in local dev to ensure cookies/CSRF match
+            \App\Http\Middleware\EnforceCanonicalHost::class,
+
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
 

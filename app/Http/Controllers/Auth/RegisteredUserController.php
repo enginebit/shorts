@@ -7,19 +7,22 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\EmailService;
+use App\Services\OtpService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class RegisteredUserController extends Controller
 {
     public function __construct(
-        private readonly EmailService $emailService
+        private readonly EmailService $emailService,
+        private readonly OtpService $otpService
     ) {}
 
     /**
@@ -64,6 +67,58 @@ final class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('onboarding.welcome', absolute: false));
+    }
+
+    /**
+     * Send OTP for email verification
+     */
+    public function sendOtp(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email' => 'required|email|max:255',
+            'password' => 'required|string|min:8',
+        ]);
+
+        try {
+            $this->otpService->sendOtp($request->email, $request->password);
+
+            return redirect()->back()->with('success', 'Verification code sent to your email!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors([
+                'email' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Verify OTP and create user account
+     */
+    public function verifyOtp(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email' => 'required|email|max:255',
+            'password' => 'required|string|min:8',
+            'code' => 'required|string|size:6',
+        ]);
+
+        try {
+            $user = $this->otpService->verifyOtpAndCreateUser(
+                $request->email,
+                $request->password,
+                $request->code
+            );
+
+            // Log the user in
+            Auth::login($user);
+
+            return redirect(route('onboarding.welcome', absolute: false));
+
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors([
+                'code' => $e->getMessage(),
+            ]);
+        }
     }
 }

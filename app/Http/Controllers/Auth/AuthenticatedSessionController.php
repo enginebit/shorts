@@ -10,6 +10,7 @@ use App\Services\WorkspaceAuthService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -46,7 +47,25 @@ final class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Preserve CSRF token across session regeneration
+        $csrfToken = $request->session()->token();
+        Log::info('Login: Preserving CSRF token across session regeneration', [
+            'user_id' => $request->user()?->id,
+            'old_session_id' => $request->session()->getId(),
+            'csrf_token_prefix' => substr($csrfToken, 0, 10) . '...',
+        ]);
+
         $request->session()->regenerate();
+        $request->session()->put('_token', $csrfToken);
+
+        // Ensure session is fully written before proceeding
+        $request->session()->save();
+
+        Log::info('Login: Session regenerated with preserved CSRF token', [
+            'new_session_id' => $request->session()->getId(),
+            'preserved_token_prefix' => substr($request->session()->token(), 0, 10) . '...',
+            'token_matches' => $csrfToken === $request->session()->token(),
+        ]);
 
         $user = $request->user();
 
@@ -73,6 +92,13 @@ final class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $userId = $request->user()?->id;
+
+        Log::info('Logout process started', [
+            'user_id' => $userId,
+            'session_id' => $request->session()->getId(),
+        ]);
+
         // Clear workspace context before logout
         $this->workspaceAuthService->clearWorkspaceContext();
 
@@ -82,6 +108,11 @@ final class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        Log::info('Logout process completed', [
+            'user_id' => $userId,
+            'redirect_to' => route('login'),
+        ]);
+
+        return redirect(route('login'));
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-use Laravel\Sanctum\Sanctum;
-
 return [
 
     /*
@@ -15,12 +13,14 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s%s',
-        'localhost,localhost:3000,localhost:5173,127.0.0.1,127.0.0.1:8000,127.0.0.1:5173,::1',
-        Sanctum::currentApplicationUrlWithPort(),
-        env('APP_ENV') === 'production' ? ',shorts.com,app.shorts.com' : '',
-    ))),
+    'stateful' => (function () {
+        $domains = require __DIR__.'/domains.php';
+        $base = [
+            'localhost', 'localhost:3000', 'localhost:5173',
+            '127.0.0.1', '127.0.0.1:8000', '127.0.0.1:5173', '::1',
+        ];
+        return array_values(array_unique(array_merge($base, $domains['stateful_domains'])));
+    })(),
 
     /*
     |--------------------------------------------------------------------------

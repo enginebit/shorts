@@ -34,6 +34,12 @@ Route::middleware('guest')->group(function () {
         ->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    // OTP routes for email verification
+    Route::post('auth/send-otp', [RegisteredUserController::class, 'sendOtp'])
+        ->name('auth.send-otp');
+    Route::post('auth/verify-otp', [RegisteredUserController::class, 'verifyOtp'])
+        ->name('auth.verify-otp');
 });
 
 // Authenticated routes
@@ -48,6 +54,10 @@ Route::middleware('auth')->group(function () {
     // Onboarding for new users
     Route::get('/onboarding', [OnboardingController::class, 'index'])
         ->name('onboarding');
+    Route::get('/onboarding/welcome', [OnboardingController::class, 'welcome'])
+        ->name('onboarding.welcome');
+    Route::get('/onboarding/workspace', [OnboardingController::class, 'workspaceForm'])
+        ->name('onboarding.workspace.form');
     Route::post('/onboarding/workspace', [OnboardingController::class, 'createWorkspace'])
         ->name('onboarding.workspace');
     Route::post('/onboarding/accept/{inviteId}', [OnboardingController::class, 'acceptInvite'])

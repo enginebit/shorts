@@ -1,8 +1,8 @@
 /**
  * Tooltip Component (Simplified)
- * 
+ *
  * Migrated from: /Users/yasinboelhouwer/shorts/dub-main/packages/ui/src/tooltip.tsx
- * 
+ *
  * Adaptations for Laravel + Inertia.js:
  * - Simplified implementation without Radix UI for now
  * - Will be enhanced with full Radix UI integration later

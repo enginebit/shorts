@@ -110,102 +110,42 @@ export function updateCSRFMetaTag(token: string): void {
 export function synchronizeCSRFToken(): CSRFTokenInfo {
   const tokenInfo = getCurrentCSRFToken();
 
-  // Determine authoritative tokens explicitly
-  const sessionToken = ((): string | null => {
+  if (tokenInfo.isValid && tokenInfo.token) {
+    // If we have a cookie token, keep meta in sync with it to avoid mismatch
+    if (tokenInfo.source === 'cookie') {
+      updateCSRFMetaTag(tokenInfo.token);
+    }
+
+    // Update axios defaults if available
     try {
       // @ts-ignore
-      const p = window?.Inertia?.page?.props || (window as any)?.__INERTIA__?.page?.props || {};
-      if (p.csrf_token) return p.csrf_token as string;
-    } catch {}
-    const meta = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-    return meta || null;
-  })();
-  const xsrfCookie = ((): string | null => {
-    try {
-      const m = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/);
-      return m ? decodeURIComponent(m[1]) : null;
-    } catch { return null; }
-  })();
-
-  // Sync meta tag only when the source is props (fresh session token)
-  if (tokenInfo.isValid && tokenInfo.source === 'props' && tokenInfo.token) {
-    updateCSRFMetaTag(tokenInfo.token);
-  }
-
-  // Update axios defaults: X-CSRF-TOKEN = session token; X-XSRF-TOKEN = cookie
-  try {
-    // @ts-ignore
-    if (window.axios) {
-      if (sessionToken) window.axios.defaults.headers.common['X-CSRF-TOKEN'] = sessionToken;
-      if (xsrfCookie) window.axios.defaults.headers.common['X-XSRF-TOKEN'] = xsrfCookie;
+      if (window.axios) {
+        window.axios.defaults.headers.common['X-CSRF-TOKEN'] = tokenInfo.token;
+      }
+    } catch (e) {
+      // Axios not available
     }
-  } catch {}
+  }
 
   return tokenInfo;
 }
 
 /**
  * Ensure XSRF cookie exists and meta/header are synchronized before a POST
- *
- * Critical for multi-cycle authentication flows: always refresh cookie
- * to prevent stale tokens from causing 419 errors on subsequent login attempts.
  */
 export async function ensureFreshCsrf(): Promise<CSRFTokenInfo> {
   let info = getCurrentCSRFToken();
   const hasCookie = !!readXsrfCookie();
 
-  // Always refresh XSRF cookie for authentication-related requests
-  // This prevents stale cookies from multi-cycle login→logout→login flows
-  const isAuthRequest = window.location.pathname.includes('/login') ||
-                       window.location.pathname.includes('/logout') ||
-                       window.location.pathname.includes('/onboarding');
-
-  if (!hasCookie || isAuthRequest) {
+  if (!hasCookie) {
     try {
-      // Prefer axios to align with global defaults (withCredentials, xsrf names)
-      // @ts-ignore
-      const ax = window.axios;
-      if (ax) {
-        await ax.get('/sanctum/csrf-cookie', { withCredentials: true, headers: { 'Cache-Control': 'no-cache' } });
-      } else {
-        await fetch('/sanctum/csrf-cookie', {
-          credentials: 'include',
-          cache: 'no-cache', // Prevent cached responses
-        });
-      }
-
-      // Slightly longer delay to ensure cookie write visibility across engines
-      await new Promise(resolve => setTimeout(resolve, 50));
-    } catch (error) {
-      console.warn('Failed to refresh CSRF cookie:', error);
-    }
+      await fetch('/sanctum/csrf-cookie', { credentials: 'include' });
+    } catch {}
   }
 
-  // Re-evaluate and sync after potential cookie refresh
+  // Re-evaluate and sync
   info = synchronizeCSRFToken();
   return info;
-}
-
-/**
- * Clear CSRF state on logout to prevent stale tokens in multi-cycle flows
- */
-export function clearCSRFState(): void {
-  // Clear meta tag
-  const metaTag = document.querySelector('meta[name="csrf-token"]');
-  if (metaTag) {
-    metaTag.setAttribute('content', '');
-  }
-
-  // Clear axios defaults if available
-  try {
-    // @ts-ignore
-    if (window.axios) {
-      delete window.axios.defaults.headers.common['X-CSRF-TOKEN'];
-      delete window.axios.defaults.headers.common['X-XSRF-TOKEN'];
-    }
-  } catch {}
-
-  console.log('CSRF state cleared for logout');
 }
 
 /**

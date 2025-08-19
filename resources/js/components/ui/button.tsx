@@ -1,8 +1,8 @@
 /**
  * Button Component
- * 
+ *
  * Migrated from: /Users/yasinboelhouwer/shorts/dub-main/packages/ui/src/button.tsx
- * 
+ *
  * Adaptations for Laravel + Inertia.js:
  * - Replaced @dub/utils with local utils
  * - Adapted color scheme to our neutral palette

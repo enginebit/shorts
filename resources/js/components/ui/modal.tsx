@@ -89,13 +89,13 @@ export function Modal({
   // Mobile drawer implementation
   if (isMobile && !desktopOnly) {
     return (
-      <div className="fixed inset-0 z-50">
+      <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
         {/* Backdrop */}
         <div
           className="fixed inset-0 bg-neutral-100 bg-opacity-10 backdrop-blur"
           onClick={() => closeModal({ dragged: true })}
         />
-        
+
         {/* Drawer content */}
         <div
           ref={modalRef}
@@ -129,7 +129,7 @@ export function Modal({
 
   // Desktop modal implementation
   return (
-    <div className="fixed inset-0 z-40">
+    <div className="fixed inset-0 z-40" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div
         id="modal-backdrop"
@@ -140,7 +140,7 @@ export function Modal({
           }
         }}
       />
-      
+
       {/* Modal content */}
       <div
         ref={modalRef}
@@ -204,11 +204,11 @@ export function Dialog({
           )}
         </div>
       )}
-      
+
       <div className={cn('flex-1 px-6 py-4', contentClassName)}>
         {children}
       </div>
-      
+
       {footer && (
         <div className={cn('border-t border-neutral-200 px-6 py-4', footerClassName)}>
           {footer}

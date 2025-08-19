@@ -19,17 +19,14 @@
  */
 
 import { Head, router } from '@inertiajs/react';
+import React, { useMemo, useCallback } from 'react';
+import { formatDate, formatNumber } from '@/lib/format';
 import { useState } from 'react';
-import { Plus, Search, Filter, MoreHorizontal, ExternalLink, Copy, Edit, Trash2 } from 'lucide-react';
-import { AppLayout } from '@/layouts/app-layout';
-import { 
-  PageWidthWrapper, 
-  Button, 
-  CardList,
-  PageHeader,
-  Input,
-  Popover
-} from '@/components/ui';
+import { Plus, MoreHorizontal, ExternalLink, Copy, Edit, Trash2 } from 'lucide-react';
+import AppLayout from '@/layouts/app-layout';
+import { PageWidthWrapper, Button, CardList, Input, Popover } from '@/components/ui';
+import LinksHeader from '@/components/dashboard/links/links-header';
+import { AnimatedEmptyState } from '@/components/shared/animated-empty-state';
 import { useLinkBuilder, useConfirmModal } from '@/contexts/modal-context';
 import { useWorkspace } from '@/contexts/workspace-context';
 import { toast } from 'sonner';
@@ -67,7 +64,7 @@ interface LinksPageProps {
   };
 }
 
-function LinkCard({ link }: { link: Link }) {
+const LinkCard = React.memo(function LinkCard({ link }: { link: Link }) {
   const { showConfirm } = useConfirmModal();
 
   const handleCopyLink = async () => {
@@ -107,6 +104,8 @@ function LinkCard({ link }: { link: Link }) {
     // This will be enhanced to open the modal with existing link data
     toast.info('Edit functionality will be enhanced in the next update');
   };
+
+  const formattedCreatedAt = useMemo(() => formatDate(link.createdAt), [link.createdAt]);
 
   return (
     <CardList.Card>
@@ -148,13 +147,11 @@ function LinkCard({ link }: { link: Link }) {
         {/* Stats - Right Column */}
         <div className="flex items-center justify-end gap-2 sm:gap-5">
           <div className="text-right">
-            <p className="font-medium text-neutral-900">{link.clicks}</p>
+            <p className="font-medium text-neutral-900">{formatNumber(link.clicks)}</p>
             <p className="text-xs text-neutral-500">clicks</p>
           </div>
           <div className="text-right hidden sm:block">
-            <p className="text-xs text-neutral-500">
-              {new Date(link.createdAt).toLocaleDateString()}
-            </p>
+            <p className="text-xs text-neutral-500">{formattedCreatedAt}</p>
             <p className="text-xs text-neutral-400">{link.user.name}</p>
           </div>
 
@@ -195,9 +192,10 @@ function LinkCard({ link }: { link: Link }) {
       </div>
     </CardList.Card>
   );
-}
+});
 
-function LinksHeader({ totalLinks, onSearch }: { totalLinks: number; onSearch: (query: string) => void }) {
+/* extracted to components/dashboard/links/links-header */
+function OldLinksHeaderRemoved() {
   const { setShowLinkBuilder } = useLinkBuilder();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -244,22 +242,23 @@ function LinksHeader({ totalLinks, onSearch }: { totalLinks: number; onSearch: (
   );
 }
 
-export default function LinksPage({ 
-  links, 
-  totalLinks, 
-  currentPage, 
-  totalPages, 
+export default function LinksPage({
+  links,
+  totalLinks,
+  currentPage,
+  totalPages,
   search,
-  workspace 
+  workspace
 }: LinksPageProps) {
   const { setShowLinkBuilder } = useLinkBuilder();
 
-  const handleSearch = (query: string) => {
-    router.get(route('workspace.links', { workspace: workspace.slug }), 
-      { search: query }, 
+  const handleSearch = useCallback((query: string) => {
+    router.get(route('workspace.links', { workspace: workspace.slug }),
+      { search: query },
       { preserveState: true }
     );
-  };
+  }, [workspace.slug]);
+
 
   return (
     <AppLayout>
@@ -277,22 +276,21 @@ export default function LinksPage({
               ))}
             </CardList>
           ) : (
-            <div className="text-center py-12">
-              <div className="mx-auto h-24 w-24 rounded-full bg-neutral-100 flex items-center justify-center">
-                <Plus className="h-8 w-8 text-neutral-400" />
-              </div>
-              <h3 className="mt-4 text-lg font-medium text-neutral-900">No links yet</h3>
-              <p className="mt-2 text-sm text-neutral-500 max-w-sm mx-auto">
-                Get started by creating your first short link. Share it anywhere and track its performance.
-              </p>
-              <Button 
-                onClick={() => setShowLinkBuilder(true)}
-                className="mt-6"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Link
-              </Button>
-            </div>
+            <AnimatedEmptyState
+              title="No links yet"
+              description="Get started by creating your first short link. Share it anywhere and track its performance."
+              cardContent={
+                <div className="mx-auto h-24 w-24 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <Plus className="h-8 w-8 text-neutral-400" />
+                </div>
+              }
+              addButton={
+                <Button onClick={() => setShowLinkBuilder(true)} className="mt-6">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Link
+                </Button>
+              }
+            />
           )}
 
           {/* Pagination */}
@@ -304,8 +302,8 @@ export default function LinksPage({
                   variant={page === currentPage ? 'primary' : 'secondary'}
                   size="sm"
                   onClick={() => {
-                    router.get(route('workspace.links', { workspace: workspace.slug }), 
-                      { page, search }, 
+                    router.get(route('workspace.links', { workspace: workspace.slug }),
+                      { page, search },
                       { preserveState: true }
                     );
                   }}

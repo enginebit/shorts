@@ -1,11 +1,11 @@
-/* Tailwind CSS v4 import */
-@import "tailwindcss";
-
-/* Inter font import */
+/* Inter font import - must come first */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Dub-main design system themes */
 @import './themes.css';
+
+/* Tailwind CSS v4 import */
+@import "tailwindcss";
 
 /*
  * Tailwind CSS v4 Theme Configuration
@@ -25,6 +25,12 @@
 
   /* Extended screens */
   --breakpoint-xs: 26.25rem; /* 420px */
+
+  /* Protocol design system dimensions */
+  --width-152: 38rem; /* 608px - for Protocol background positioning */
+  --width-278.25: 69.5625rem; /* 1113px / 4 - for Protocol SVG */
+  --width-325: 81.25rem; /* 1300px - for Protocol background width */
+  --height-100: 25rem; /* 400px - for Protocol background height */
 
   /* Font sizes */
   --font-size-2xs: 0.625rem;
@@ -134,4 +140,68 @@
 
 .animate-spinner {
   animation: spinner 1.2s linear infinite;
+}
+
+/* Slide up fade animation for welcome page */
+@keyframes slide-up-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(var(--offset, 10px));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slide-up-fade var(--animation-duration, 1s) var(--animation-delay, 0ms) var(--animation-fill-mode, forwards);
+  opacity: 0;
+}
+
+/* Auto-fill detection animation */
+@keyframes autofill-detected {
+  0% {
+    background-color: transparent;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Trigger animation when browser auto-fills input */
+input:-webkit-autofill {
+  animation: autofill-detected 0.1s;
+  animation-fill-mode: both;
+}
+
+/* Protocol design system utilities */
+.protocol-gradient {
+  background: linear-gradient(to right, #36b49f, #DBFF75);
+}
+
+.protocol-mask-radial {
+  mask: radial-gradient(farthest-side at top, white, transparent);
+  -webkit-mask: radial-gradient(farthest-side at top, white, transparent);
+}
+
+.protocol-mask-linear {
+  mask: linear-gradient(white, transparent);
+  -webkit-mask: linear-gradient(white, transparent);
+}
+
+/* Protocol background page styles */
+.protocol-page {
+  background-color: white;
+  position: relative;
+  min-height: 100vh;
+}
+
+.dark .protocol-page {
+  background-color: rgb(24 24 27); /* zinc-900 */
+}
+
+input:autofill {
+  animation: autofill-detected 0.1s;
+  animation-fill-mode: both;
 }

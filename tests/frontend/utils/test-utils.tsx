@@ -46,9 +46,9 @@ interface TestWrapperProps {
   pageProps?: MockPageProps
 }
 
-const TestWrapper: React.FC<TestWrapperProps> = ({ 
-  children, 
-  pageProps = defaultProps 
+const TestWrapper: React.FC<TestWrapperProps> = ({
+  children,
+  pageProps = defaultProps
 }) => {
   // Mock usePage hook for this test
   vi.doMock('@inertiajs/react', async () => {
@@ -73,7 +73,7 @@ const customRender = (
   }
 ) => {
   const { pageProps, ...renderOptions } = options || {}
-  
+
   return render(ui, {
     wrapper: ({ children }) => (
       <TestWrapper pageProps={pageProps}>{children}</TestWrapper>
@@ -215,7 +215,7 @@ export const mockFailedFormSubmission = (errors: Record<string, string> = {}) =>
 export const waitFor = (callback: () => void, timeout = 1000) => {
   return new Promise<void>((resolve, reject) => {
     const startTime = Date.now()
-    
+
     const check = () => {
       try {
         callback()
@@ -228,7 +228,7 @@ export const waitFor = (callback: () => void, timeout = 1000) => {
         }
       }
     }
-    
+
     check()
   })
 }

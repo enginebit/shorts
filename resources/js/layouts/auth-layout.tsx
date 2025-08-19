@@ -18,6 +18,8 @@
 
 import { ReactNode, Suspense } from 'react';
 import { ClientOnly } from '@/components/ui';
+import { ProtocolPage } from '@/components/shared/protocol-background';
+import ThemeToggle from '@/components/shared/theme-toggle';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -26,38 +28,40 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children, showTerms = false }: AuthLayoutProps) {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-between">
-      {/* Empty div to help center main content */}
-      <div className="grow basis-0">
-        <div className="h-24" />
-      </div>
+    <ProtocolPage variant="full">
+      <div className="flex min-h-screen w-full flex-col items-center justify-between">
+        {/* Top bar with theme toggle */}
+        <div className="flex w-full items-center justify-end px-4 py-4">
+          <ThemeToggle />
+        </div>
 
-      <ClientOnly className="relative flex w-full flex-col items-center justify-center px-4">
-        <Suspense>{children}</Suspense>
-      </ClientOnly>
+        <ClientOnly className="relative flex w-full flex-col items-center justify-center px-4">
+          <Suspense>{children}</Suspense>
+        </ClientOnly>
 
-      <div className="flex grow basis-0 flex-col justify-end">
-        {showTerms && (
-          <p className="px-20 py-8 text-center text-xs font-medium text-neutral-500 md:px-0">
-            By continuing, you agree to Shorts&rsquo;s{" "}
-            <a
-              href="/legal/terms"
-              target="_blank"
-              className="font-semibold text-neutral-600 hover:text-neutral-800"
-            >
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a
-              href="/legal/privacy"
-              target="_blank"
-              className="font-semibold text-neutral-600 hover:text-neutral-800"
-            >
-              Privacy Policy
-            </a>
-          </p>
-        )}
+        <div className="flex grow basis-0 flex-col justify-end">
+          {showTerms && (
+            <p className="px-20 py-8 text-center text-xs font-medium text-[rgb(var(--content-subtle))] md:px-0">
+              By continuing, you agree to brachy.io&rsquo;s{" "}
+              <a
+                href="/legal/terms"
+                target="_blank"
+                className="font-semibold text-[rgb(var(--content-default))] hover:text-[rgb(var(--content-emphasis))]"
+              >
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a
+                href="/legal/privacy"
+                target="_blank"
+                className="font-semibold text-[rgb(var(--content-default))] hover:text-[rgb(var(--content-emphasis))]"
+              >
+                Privacy Policy
+              </a>
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </ProtocolPage>
   );
 }

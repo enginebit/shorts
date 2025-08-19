@@ -9,6 +9,7 @@ use App\Services\WorkspaceAuthService;
 use App\Services\WorkspaceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,6 +41,14 @@ final class OnboardingController extends Controller
     public function index(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
+
+        // Debug: Check CSRF token availability
+        Log::info('Onboarding index: CSRF token check', [
+            'user_id' => $user?->id,
+            'session_id' => $request->session()->getId(),
+            'csrf_token_prefix' => substr($request->session()->token(), 0, 10) . '...',
+            'has_csrf_token' => !empty($request->session()->token()),
+        ]);
 
         // Check if user already has workspaces
         if ($user->workspaces()->exists()) {
@@ -174,8 +183,43 @@ final class OnboardingController extends Controller
      */
     public function skip(Request $request): RedirectResponse
     {
-        // For users who want to skip workspace creation
-        // They can create workspaces later from the dashboard
-        return redirect('/dashboard');
+        // Debug logging
+        \Log::info('Onboarding skip requested', [
+            'user_id' => $request->user()?->id,
+            'session_id' => $request->session()->getId(),
+            'csrf_token' => $request->session()->token(),
+            'request_token' => $request->input('_token'),
+        ]);
+
+        try {
+            // For users who want to skip workspace creation
+            // They can create workspaces later from the dashboard
+            return redirect(route('dashboard'));
+        } catch (\Exception $e) {
+            \Log::error('Onboarding skip failed', [
+                'error' => $e->getMessage(),
+                'user_id' => $request->user()?->id,
+            ]);
+
+            return redirect()->back()->withErrors([
+                'message' => 'Failed to skip workspace creation. Please try again.',
+            ]);
+        }
+    }
+
+    /**
+     * Show the welcome page
+     */
+    public function welcome(): Response
+    {
+        return Inertia::render('onboarding/welcome');
+    }
+
+    /**
+     * Show the workspace creation form
+     */
+    public function workspaceForm(): Response
+    {
+        return Inertia::render('onboarding/workspace');
     }
 }

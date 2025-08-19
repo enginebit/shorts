@@ -19,8 +19,19 @@ export default defineConfig({
         },
     },
     server: {
+        host: '0.0.0.0',
+        port: 5174,
+        strictPort: true,
+        cors: {
+            origin: [
+                /https?:\/\/.+\.brachy\.io(?::\d+)?$/,
+            ],
+            credentials: true,
+        },
         hmr: {
             host: 'localhost',
+            protocol: 'ws',
+            port: 5174,
         },
     },
 });

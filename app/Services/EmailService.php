@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Mail\LinkCreatedNotificationEmail;
+use App\Mail\VerificationEmail;
 use App\Mail\WelcomeEmail;
 use App\Mail\WorkspaceInvitationEmail;
 use App\Models\Link;
@@ -275,6 +276,35 @@ class EmailService
                 'to' => $toEmail,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Send email verification OTP
+     */
+    public function sendVerificationEmail(string $email, string $code): bool
+    {
+        try {
+            Log::info('Sending verification email', [
+                'email' => $email,
+                'code_length' => strlen($code),
+            ]);
+
+            Mail::to($email)->send(new VerificationEmail($email, $code));
+
+            Log::info('Verification email sent successfully', [
+                'email' => $email,
+            ]);
+
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Failed to send verification email', [
+                'email' => $email,
+                'error' => $e->getMessage(),
             ]);
 
             return false;

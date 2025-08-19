@@ -18,7 +18,7 @@
 
 import { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
-import { Button, Input } from '@/components/ui';
+import { Button, Input, PageWidthWrapper } from '@/components/ui';
 import AuthLayout from '@/layouts/auth-layout';
 import { route } from 'ziggy-js';
 
@@ -51,30 +51,31 @@ export default function OnboardingIndex({
 
   const handleCreateWorkspace = (e: React.FormEvent) => {
     e.preventDefault();
-    post(route('onboarding.workspace'), {
+    post('/onboarding/workspace', {
       onSuccess: () => reset(),
     });
   };
 
   const handleAcceptInvite = (inviteId: string) => {
-    post(route('onboarding.accept', inviteId));
+    post(`/onboarding/accept/${inviteId}`);
   };
 
   const handleDeclineInvite = (inviteId: string) => {
-    post(route('onboarding.decline', inviteId));
+    post(`/onboarding/decline/${inviteId}`);
   };
 
   return (
     <AuthLayout>
-      <Head title="Welcome to Shorts" />
+      <Head title="Welcome to brachy.io" />
 
-      <div className="w-full max-w-md space-y-8">
+      <PageWidthWrapper>
+        <div className="mx-auto max-w-md space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-900">
-            Welcome to Shorts
+          <h1 className="text-2xl font-bold text-[rgb(var(--content-emphasis))]">
+            Welcome to brachy.io
           </h1>
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-[rgb(var(--content-subtle))]">
             Get started by creating your first workspace or accepting an invitation.
           </p>
         </div>
@@ -82,14 +83,14 @@ export default function OnboardingIndex({
         {/* Pending Invitations */}
         {pendingInvites.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-neutral-900">
+            <h2 className="text-lg font-semibold text-[rgb(var(--content-emphasis))]">
               Pending Invitations
             </h2>
 
             {pendingInvites.map((invite) => (
               <div
                 key={invite.id}
-                className="rounded-lg border border-neutral-200 bg-white p-4"
+                className="rounded-lg border border-[rgb(var(--border-default))] bg-[rgb(var(--bg-default))] p-4"
               >
                 <div className="flex items-center gap-3">
                   {invite.workspace.logo ? (
@@ -99,16 +100,16 @@ export default function OnboardingIndex({
                       className="size-10 rounded-lg"
                     />
                   ) : (
-                    <div className="flex size-10 items-center justify-center rounded-lg bg-neutral-900 text-sm font-medium text-white">
+                    <div className="flex size-10 items-center justify-center rounded-lg bg-[rgb(var(--content-emphasis))] text-sm font-medium text-[rgb(var(--content-inverted))]">
                       {invite.workspace.name.charAt(0).toUpperCase()}
                     </div>
                   )}
 
                   <div className="flex-1">
-                    <h3 className="font-medium text-neutral-900">
+                    <h3 className="font-medium text-[rgb(var(--content-emphasis))]">
                       {invite.workspace.name}
                     </h3>
-                    <p className="text-sm text-neutral-600">
+                    <p className="text-sm text-[rgb(var(--content-subtle))]">
                       Invited as {invite.role}
                     </p>
                   </div>
@@ -135,10 +136,10 @@ export default function OnboardingIndex({
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-neutral-200" />
+                <div className="w-full border-t border-[rgb(var(--border-default))]" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-neutral-500">or</span>
+                <span className="bg-[rgb(var(--bg-default))] px-2 text-[rgb(var(--content-subtle))]">or</span>
               </div>
             </div>
           </div>
@@ -157,7 +158,7 @@ export default function OnboardingIndex({
             ) : (
               <form onSubmit={handleCreateWorkspace} className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-neutral-700">
+                  <label htmlFor="name" className="block text-sm font-medium text-[rgb(var(--content-default))]">
                     Workspace name
                   </label>
                   <Input
@@ -172,12 +173,12 @@ export default function OnboardingIndex({
                 </div>
 
                 <div>
-                  <label htmlFor="slug" className="block text-sm font-medium text-neutral-700">
+                  <label htmlFor="slug" className="block text-sm font-medium text-[rgb(var(--content-default))]">
                     Workspace URL
                   </label>
                   <div className="mt-1 flex rounded-md shadow-sm">
-                    <span className="inline-flex items-center rounded-l-md border border-r-0 border-neutral-300 bg-neutral-50 px-3 text-sm text-neutral-500">
-                      shorts.com/
+                    <span className="inline-flex items-center rounded-l-md border border-r-0 border-[rgb(var(--border-default))] bg-[rgb(var(--bg-muted))] px-3 text-sm text-[rgb(var(--content-subtle))]">
+                      brachy.io/
                     </span>
                     <Input
                       id="slug"
@@ -218,12 +219,13 @@ export default function OnboardingIndex({
           <button
             type="button"
             className="text-sm text-neutral-500 hover:text-neutral-700"
-            onClick={() => post(route('onboarding.skip'))}
+            onClick={() => post('/onboarding/skip')}
           >
             Skip for now
           </button>
         </div>
-      </div>
+        </div>
+      </PageWidthWrapper>
     </AuthLayout>
   );
 }

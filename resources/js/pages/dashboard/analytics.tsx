@@ -18,26 +18,24 @@
 
 import { Head, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import { formatNumber } from '@/lib/format';
 import { BarChart3, TrendingUp, Globe, Users, MousePointer, ExternalLink, RefreshCw } from 'lucide-react';
-import { AppLayout } from '@/layouts/app-layout';
-import { 
-  PageWidthWrapper, 
-  Button, 
-  PageHeader 
-} from '@/components/ui';
+import AppLayout from '@/layouts/app-layout';
+import { PageWidthWrapper, Button } from '@/components/ui';
+import { PageHeader } from '@/components/navigation/page-header';
 import { useWorkspace } from '@/contexts/workspace-context';
 import { AnalyticsCard, ANALYTICS_TABS } from '@/components/analytics/analytics-card';
-import { 
-  MetricsCard, 
-  ClicksMetricsCard, 
-  VisitorsMetricsCard, 
-  ConversionRateCard 
+import {
+  MetricsCard,
+  ClicksMetricsCard,
+  VisitorsMetricsCard,
+  ConversionRateCard
 } from '@/components/analytics/metrics-card';
-import { 
-  BarList, 
-  createCountryBarList, 
-  createReferrerBarList, 
-  createDeviceBarList 
+import {
+  BarList,
+  createCountryBarList,
+  createReferrerBarList,
+  createDeviceBarList
 } from '@/components/analytics/bar-list';
 import { TimePeriodSelector, useTimePeriod } from '@/components/analytics/time-period-selector';
 import { toast } from 'sonner';
@@ -59,12 +57,12 @@ interface AnalyticsData {
   topCountries: Array<{ country: string; clicks: number }>;
   topReferrers: Array<{ referrer: string; clicks: number }>;
   topDevices: Array<{ device: string; clicks: number }>;
-  topLinks: Array<{ 
-    id: string; 
-    url: string; 
-    shortLink: string; 
-    clicks: number; 
-    title?: string; 
+  topLinks: Array<{
+    id: string;
+    url: string;
+    shortLink: string;
+    clicks: number;
+    title?: string;
   }>;
 }
 
@@ -78,10 +76,10 @@ interface AnalyticsPageProps {
   interval?: string;
 }
 
-export default function AnalyticsPage({ 
-  workspace, 
+export default function AnalyticsPage({
+  workspace,
   initialData,
-  interval = '7d' 
+  interval = '7d'
 }: AnalyticsPageProps) {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);
@@ -278,7 +276,7 @@ export default function AnalyticsPage({
                         </p>
                       </div>
                       <div className="text-sm font-medium text-neutral-900 ml-4">
-                        {link.clicks.toLocaleString()}
+                        {formatNumber(link.clicks)}
                       </div>
                     </div>
                   )) || (

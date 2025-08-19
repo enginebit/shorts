@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\StripeWebhookController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,6 +25,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->middleware('rate.limit:auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
+    // OTP routes for email verification
+    Route::post('send-otp', [OtpController::class, 'sendOtp']);
+    Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
 
     // Password reset routes with stricter rate limiting
     Route::middleware('rate.limit:password-reset')->group(function () {

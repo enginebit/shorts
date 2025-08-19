@@ -1,13 +1,14 @@
 /**
  * Dashboard Page Component
- * 
+ *
  * Simple dashboard page for authenticated users
  * Will be enhanced with full dashboard functionality later
  */
 
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
-import { Button, PageHeader, PageWidthWrapper } from '@/components/ui';
+import { Button, PageWidthWrapper } from '@/components/ui';
+import { PageHeader } from '@/components/navigation/page-header';
 import { PageProps } from '@/types';
 import { route } from 'ziggy-js';
 
@@ -15,7 +16,8 @@ export default function Dashboard({ auth }: PageProps) {
   const { post, processing } = useForm();
 
   const logout = () => {
-    post(route('logout'));
+    // Use relative path to avoid any FQDN host mismatch issues
+    post('/logout');
   };
 
   return (
@@ -87,7 +89,7 @@ export default function Dashboard({ auth }: PageProps) {
                   <p>✅ Laravel Sanctum integration</p>
                   <p>✅ Inertia.js authentication flow</p>
                 </div>
-                
+
                 <div className="mt-4 flex gap-2">
                   <Link href={route('login')}>
                     <Button variant="outline" text="View Login Page" />

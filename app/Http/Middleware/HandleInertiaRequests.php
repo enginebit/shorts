@@ -63,6 +63,10 @@ class HandleInertiaRequests extends Middleware
             // Workspace data for authenticated users
             'workspaces' => $workspaceData['workspaces'] ?? [],
             'currentWorkspace' => $workspaceData['currentWorkspace'] ?? null,
+            // Ensure CSRF token is always available and fresh
+            'csrf_token' => $request->session()->token(),
+            'csrf_meta_token' => csrf_token(), // For debugging meta tag vs session token
+            'session_id' => $request->session()->getId(), // For debugging session changes
         ];
     }
 }

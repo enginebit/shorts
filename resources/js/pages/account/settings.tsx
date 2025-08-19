@@ -21,11 +21,9 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import { User, Shield, Key, Bell, Trash2 } from 'lucide-react';
-import { AppLayout } from '@/layouts/app-layout';
-import { 
-  PageWidthWrapper, 
-  PageHeader
-} from '@/components/ui';
+import AppLayout from '@/layouts/app-layout';
+import { PageWidthWrapper } from '@/components/ui';
+import { PageHeader } from '@/components/navigation/page-header';
 import { AccountProfileSettings } from '@/components/settings/account-profile-settings';
 import { AccountSecuritySettings } from '@/components/settings/account-security-settings';
 import { AccountAPISettings } from '@/components/settings/account-api-settings';
@@ -107,7 +105,7 @@ export default function AccountSettings({ user }: AccountSettingsProps) {
               {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
-                
+
                 return (
                   <button
                     key={section.id}

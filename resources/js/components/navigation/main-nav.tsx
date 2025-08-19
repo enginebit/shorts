@@ -48,10 +48,14 @@ export function MainNav({
   useEffect(() => {
     const handleStart = () => setIsOpen(false);
 
-    router.on('start', handleStart);
+    // Add event listener
+    const removeListener = router.on('start', handleStart);
 
+    // Return cleanup function
     return () => {
-      router.off('start', handleStart);
+      if (typeof removeListener === 'function') {
+        removeListener();
+      }
     };
   }, []);
 

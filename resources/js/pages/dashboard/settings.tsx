@@ -21,16 +21,9 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { Settings, Users, Trash2, Upload, Building } from 'lucide-react';
-import { AppLayout } from '@/layouts/app-layout';
-import { 
-  PageWidthWrapper, 
-  PageHeader,
-  Button,
-  Input,
-  Label,
-  Card,
-  Separator
-} from '@/components/ui';
+import AppLayout from '@/layouts/app-layout';
+import { PageWidthWrapper, Button, Input, Label, Card, Separator } from '@/components/ui';
+import { PageHeader } from '@/components/navigation/page-header';
 import { useWorkspace } from '@/contexts/workspace-context';
 import { WorkspaceProfileSettings } from '@/components/settings/workspace-profile-settings';
 import { TeamManagementSettings } from '@/components/settings/team-management-settings';
@@ -107,7 +100,7 @@ export default function WorkspaceSettings({ workspace }: WorkspaceSettingsProps)
               {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
-                
+
                 return (
                   <button
                     key={section.id}

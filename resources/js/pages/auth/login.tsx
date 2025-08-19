@@ -11,11 +11,12 @@
  * - Uses new LoginForm component structure matching dub-main
  */
 
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import AuthLayout from '@/layouts/auth-layout';
 import { route } from 'ziggy-js';
 import LoginForm from '@/components/auth/login-form';
 import { AuthAlternativeBanner } from '@/components/auth/auth-alternative-banner';
+import Logo from '@/components/shared/logo';
 
 interface LoginProps {
   canResetPassword: boolean;
@@ -26,20 +27,21 @@ export default function Login({ canResetPassword, status }: LoginProps) {
 
   return (
     <AuthLayout showTerms>
-      <Head title="Log in to your Shorts account" />
+      <Head title="Log in to brachy.io" />
 
       <div className="w-full max-w-sm">
-        <h3 className="text-center text-xl font-semibold">
-          Log in to your Shorts account
-        </h3>
+        <div className="mt-2 flex items-center justify-center gap-4">
+          <Logo variant="icon" size="lg" />
+          <Logo variant="text" size="lg" />
+        </div>
         <div className="mt-8">
           <LoginForm />
         </div>
-        <p className="mt-6 text-center text-sm font-medium text-neutral-500">
+        <p className="mt-6 text-center text-sm font-medium text-[rgb(var(--content-subtle))]">
           Don't have an account?&nbsp;
           <Link
             href={route('register')}
-            className="font-semibold text-neutral-700 transition-colors hover:text-neutral-900"
+            className="font-semibold text-[rgb(var(--content-default))] transition-colors hover:text-[rgb(var(--content-emphasis))]"
           >
             Sign up
           </Link>
@@ -47,9 +49,9 @@ export default function Login({ canResetPassword, status }: LoginProps) {
 
         <div className="mt-12 w-full">
           <AuthAlternativeBanner
-            text="Looking for your Shorts partner account?"
-            cta="Log in at partners.shorts.co"
-            href="https://partners.shorts.co/login"
+            text="Looking for your branchy.io partner account?"
+            cta="Log in at partners.brachy.io"
+            href="https://partners.brachy.io/login"
           />
         </div>
       </div>

@@ -10,6 +10,7 @@ import { MainNav, Sidebar } from '@/components/ui';
 import { ModalProvider } from '@/contexts/modal-context';
 import { WorkspaceProvider } from '@/contexts/workspace-context';
 import { ModalProviderIntegration } from '@/components/modals/modal-provider-integration';
+import { ErrorBoundary } from '@/components/shared/error-boundary';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -20,12 +21,14 @@ export default function AppLayout({ children, className }: AppLayoutProps) {
   return (
     <WorkspaceProvider>
       <ModalProvider>
-        <MainNav sidebar={Sidebar}>
-          <div className={className}>
-            {children}
-          </div>
-        </MainNav>
-        
+        <ErrorBoundary>
+          <MainNav sidebar={Sidebar}>
+            <div className={className}>
+              {children}
+            </div>
+          </MainNav>
+        </ErrorBoundary>
+
         {/* Modal Components - Rendered at app level */}
         <ModalProviderIntegration />
       </ModalProvider>
